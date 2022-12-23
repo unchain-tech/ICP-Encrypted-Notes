@@ -1,3 +1,41 @@
+type DeviceAlias = text;
+type PublicKey = text;
+type EncryptedSecret = text; 
+
+type EncryptedNote = record {
+    "id": nat;
+    "encrypted_text": text;
+};
+
+type SecretError = 
+ variant {
+   Unknown;
+   NotSynced;
+ };
+
+ type UploadSecretResult = 
+  variant {
+    Ok;
+    Err: SecretError;
+  };
+
+type GetSecretResult = 
+ variant {
+   Ok: EncryptedSecret;
+   Err: SecretError;
+ };
+
 service : {
-    "greet": (text) -> (text) query;
+    "getDevices": () -> (vec record {DeviceAlias; PublicKey;}) query;
+    "registerDevice": (DeviceAlias, PublicKey) -> (bool);
+    "deleteDevice": (DeviceAlias) -> ();
+    "isSeed": () -> (bool);
+    "uploadSeedSecret": (PublicKey, EncryptedSecret) -> (UploadSecretResult);
+    "getUnsyncedPublicKeys": () -> (vec PublicKey) query;
+    "uploadEncryptedSecrets": (vec record {PublicKey; EncryptedSecret;}) -> ();
+    "getEncryptedSecrets": (PublicKey) -> (GetSecretResult) query;
+    "getNotes": () -> (vec EncryptedNote) query;
+    "addNote": (text) -> (nat);
+    "updateNote": (nat, text) -> ();
+    "deleteNote": (nat) -> ();
 }
