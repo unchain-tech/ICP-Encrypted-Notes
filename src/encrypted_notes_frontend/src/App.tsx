@@ -12,20 +12,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>
-          <button onClick={handleGreeting}>Push Greet!</button>
+        <h1 className="text-red-600">
+          Hello World!
         </h1>
-        <p className="text-red-600">
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div>
+          <button onClick={handleGreeting}>Push Greet!</button>
+        </div>
+
       </header>
     </div>
   );
