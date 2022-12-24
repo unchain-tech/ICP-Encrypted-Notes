@@ -15,7 +15,7 @@ function App() {
         <h1>
           <button onClick={handleGreeting}>Push Greet!</button>
         </h1>
-        <p>
+        <p className="text-red-600">
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
         <a
