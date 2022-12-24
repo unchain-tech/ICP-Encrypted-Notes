@@ -9,6 +9,12 @@ mod devices_store;
 mod notes_store;
 mod stores;
 
+// サンプル関数
+#[ic_cdk_macros::query]
+fn greet(name: String) -> String {
+    format!("Hello, {}!", name)
+}
+
 // 匿名Principalでの関数コールをエラーにするためのユーザーチェック関数
 //
 // [panic!]
