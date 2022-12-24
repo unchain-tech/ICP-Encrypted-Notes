@@ -1,12 +1,20 @@
 import React from 'react';
-// import logo from '../logo.svg';
-// import './App.css';
+
+import { encrypted_notes_backend } from '../../declarations/encrypted_notes_backend'
 
 function App() {
+  const handleGreeting = async () => {
+    const name = "Alice"
+    const greeting = await encrypted_notes_backend.greet(name)
+    alert(`${greeting}`)
+  }
+
   return (
     <div className="App">
       <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
+        <h1>
+          <button onClick={handleGreeting}>Push Greet!</button>
+        </h1>
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
