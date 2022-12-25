@@ -1,19 +1,19 @@
 import { FC, memo } from 'react'
 import { Routes, Route } from 'react-router-dom'
 
-import DeviceList from '../pages/DeviceList'
+import Devices from '../pages/Devices'
 import Login from '../pages/Login'
 import NewNote from '../pages/NewNote'
-import NoteList from '../pages/NoteList'
+import Notes from '../pages/Notes'
 import Page404 from '../pages/Page404'
 
 export const Router: FC = memo(() => {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route path="/notes" element={<NoteList />} />
+      <Route path="/notes" element={<Notes />} />
       <Route path="/newNote" element={<NewNote />} />
-      <Route path="/devices" element={<DeviceList />} />
+      <Route path="/devices" element={<Devices />} />
       <Route path="*" element={<Page404 />} />
     </Routes>
   )
