@@ -25,7 +25,7 @@ const Sidebar: FC = memo(() => {
         </Link>
       </nav>
     </aside>
-  );
-});
+  )
+})
 
 export default Sidebar;

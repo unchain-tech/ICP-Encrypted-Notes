@@ -12,7 +12,7 @@ const Layout: FC<Props> = memo((props) => {
       <Sidebar />
       <main className="w-full p-4">{children}</main>
     </div>
-  );
-});
+  )
+})
 
 export default Layout;
