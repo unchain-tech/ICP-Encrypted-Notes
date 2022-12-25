@@ -68,6 +68,7 @@ module.exports = {
   output: {
     filename: 'index.js',
     path: path.join(__dirname, 'dist', frontendDirectory),
+    publicPath: '/'
   },
 
   // Depending in the language or framework you are using for
@@ -117,6 +118,7 @@ module.exports = {
   // proxy /api to port 4943 during development.
   // if you edit dfx.json to define a project-specific local network, change the port to match.
   devServer: {
+    historyApiFallback: true,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:4943',
