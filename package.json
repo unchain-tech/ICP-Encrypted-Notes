@@ -16,7 +16,7 @@
     "prebuild": "npm run generate",
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run generate",
-    "generate": "dfx generate encrypted_notes_backend",
+    "generate": "dfx generate internet_identity_dev && dfx generate encrypted_notes_backend",
     "lint": "eslint --ignore-path .gitignore --ext .ts,.tsx,.js,.jsx .",
     "lint:fix": "",
     "prettier": "prettier --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .gitignore --write ."
@@ -63,6 +63,7 @@
     "last 2 edge version"
   ],
   "dependencies": {
+    "@dfinity/auth-client": "^0.15.1",
     "@types/react": "^18.0.26",
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
