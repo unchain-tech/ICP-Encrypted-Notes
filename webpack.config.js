@@ -4,6 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
+let network;
+
 function initCanisterEnv() {
   let localCanisters, prodCanisters;
   try {
@@ -21,7 +23,7 @@ function initCanisterEnv() {
     console.log('No production canister_ids.json found. Continuing with local');
   }
 
-  const network =
+  network =
     process.env.DFX_NETWORK ||
     (process.env.NODE_ENV === 'production' ? 'ic' : 'local');
 
@@ -98,6 +100,7 @@ module.exports = {
       cache: false,
     }),
     new webpack.EnvironmentPlugin({
+      DFX_NETWORK: network,
       NODE_ENV: 'development',
       ...canisterEnvVariables,
     }),
