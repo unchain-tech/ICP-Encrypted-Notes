@@ -7,6 +7,7 @@ import { canisterId as IICanisterID } from "../../../declarations/internet_ident
 import { useLoginUser } from "./useLoginUser";
 
 export const useAuth = () => {
+  // 認証成功時にページをリダイレクトするために使用
   const navigate = useNavigate()
   const { setLoginUser } = useLoginUser()
 

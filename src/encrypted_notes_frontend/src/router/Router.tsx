@@ -9,6 +9,7 @@ import Notes from '../pages/Notes'
 import Page404 from '../pages/Page404'
 
 import { Device, Note as NoteType } from '../types/data'
+import { LoginUserProvider } from '../providers/LoginUserProvider'
 
 // TODO delete
 const devices: Device[] = [
@@ -48,13 +49,15 @@ const notes: NoteType[] = [
 
 export const Router: FC = memo(() => {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/notes" element={<Notes notes={notes} />} />
-      <Route path="/notes/:noteId" element={<Note />} />
-      <Route path="/newNote" element={<NewNote />} />
-      <Route path="/devices" element={<Devices devices={devices} />} />
-      <Route path="*" element={<Page404 />} />
-    </Routes>
+    <LoginUserProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/notes" element={<Notes notes={notes} />} />
+        <Route path="/notes/:noteId" element={<Note />} />
+        <Route path="/newNote" element={<NewNote />} />
+        <Route path="/devices" element={<Devices devices={devices} />} />
+        <Route path="*" element={<Page404 />} />
+      </Routes>
+    </LoginUserProvider>
   )
 })
