@@ -1,7 +1,12 @@
 import { memo, FC } from 'react'
 import Button from '../components/Button'
+import { useAuth } from '../hooks/useAuth'
 
 const Login: FC = memo(() => {
+  const { login } = useAuth()
+
+  const handleClickLogin = () => login()
+
   return (
     <div className='w-full flex flex-col items-center justify-between'>
       <div>
@@ -10,7 +15,10 @@ const Login: FC = memo(() => {
         </h1>
       </div>
       <div className='items-center mt-48'>
-        <Button>Login with Internet Identity</Button>
+        <Button
+          onClick={handleClickLogin}
+        >
+          Login with Internet Identity</Button>
       </div>
     </div>
   )
