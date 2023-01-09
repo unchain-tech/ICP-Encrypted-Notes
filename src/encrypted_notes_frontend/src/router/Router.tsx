@@ -1,31 +1,15 @@
 import { FC, memo } from 'react'
 import { Routes, Route } from 'react-router-dom'
 
-import Devices from '../pages/Devices'
+import DeviceManagement from '../pages/DeviceManagement'
 import Login from '../pages/Login'
 import NewNote from '../pages/NewNote'
 import Note from '../pages/Note'
 import Notes from '../pages/Notes'
 import Page404 from '../pages/Page404'
 
-import { Device, Note as NoteType } from '../types/data'
+import type { Device, Note as NoteType } from '../types/data'
 import { LoginUserProvider } from '../providers/LoginUserProvider'
-
-// TODO delete
-const devices: Device[] = [
-  {
-    alias: 'device1',
-    pubkey: 'PUB_KEY_1',
-  },
-  {
-    alias: 'device2',
-    pubkey: 'PUB_KEY_2',
-  },
-  {
-    alias: 'device3',
-    pubkey: 'PUB_KEY_3',
-  },
-];
 
 // TODO deleteテストデータ
 const notes: NoteType[] = [
@@ -55,7 +39,7 @@ export const Router: FC = memo(() => {
         <Route path="/notes" element={<Notes notes={notes} />} />
         <Route path="/notes/:noteId" element={<Note />} />
         <Route path="/newNote" element={<NewNote />} />
-        <Route path="/devices" element={<Devices devices={devices} />} />
+        <Route path="/devices" element={<DeviceManagement />} />
         <Route path="*" element={<Page404 />} />
       </Routes>
     </LoginUserProvider>
