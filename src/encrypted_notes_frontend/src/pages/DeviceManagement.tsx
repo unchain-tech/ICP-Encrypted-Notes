@@ -6,16 +6,27 @@ import Button from '../components/Button'
 import { useDevices } from '../hooks/useDevices'
 
 import { useAuth } from '../hooks/useAuth'
+import { useLoginUser } from '../hooks/useLoginUser'
 
 const DeviceManagement: FC = memo(() => {
   const { isAuthenticated } = useAuth()
-  const { getDevices, deleteDevice, devices } = useDevices()
+  const { loginUser } = useLoginUser()
+  const { getDevices, devices } = useDevices()
 
   // デバイスを削除するイベントハンドラ
-  const handleDeleteDevice = (alias: string) => {
+  const handleDeleteDevice = async (alias: string) => {
     alert(`Delete ${alias}?`);
 
-    deleteDevice(alias)
+    // deleteDevice(alias)
+    try {
+      // デバイスの削除
+      await loginUser?.actor.deleteDevice(alias)
+
+      // デバイス一覧の再取得
+      getDevices()
+    } catch (err) {
+      alert(`Error deleteDevice(): ${err}`)
+    }
   }
 
   useEffect(() => {

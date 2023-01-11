@@ -9,6 +9,7 @@ import {
   createActor
 } from "../../../declarations/encrypted_notes_backend";
 import { useLoginUser } from "./useLoginUser";
+import { Crypto } from '../lib/crypto'
 
 function encrypt(): void {
   alert("Call encrypt function");
@@ -18,9 +19,10 @@ export const useAuth = () => {
   // 認証成功時にページをリダイレクトするために使用
   const navigate = useNavigate()
   const { loginUser, setLoginUser } = useLoginUser()
+  // 認証成功時にデバイス登録を行うために必要
+  const { registerDevice } = Crypto()
 
   const login = async () => {
-    encrypt()//TODO delete
 
     // アプリケーションが接続しているネットワークに応じて、
     // ユーザー認証に使用するInternet IdentityのURLを決定する
@@ -50,7 +52,7 @@ export const useAuth = () => {
 
         // 取得した`identity`を使用して、ICと対話する`agent`を作成する
         const newAgent = new HttpAgent({ identity })
-        if (process.env.DFX_NETWORD === "local") {
+        if (process.env.DFX_NETWORK === "local") {
           newAgent.fetchRootKey()
         }
 
@@ -65,8 +67,9 @@ export const useAuth = () => {
           actor: actor,
         })
 
-        await actor.registerDevice("TEST_ALIAS", "TEST_PUBLIC_KEY") // TODO: delete
-        await actor.registerDevice("TEST_ALIAS_2", "TEST_PUBLIC_KEY_2") // TODO: delete
+        // ===== クリプト関連の処理を実行 =====
+        encrypt()//TODO delete
+        await registerDevice()
 
         // ページリダイレクトをする
         navigate("/newNote")
