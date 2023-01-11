@@ -52,8 +52,9 @@ const DeviceManagement: FC = memo(() => {
                 {device[0]}
               </code>
               {/* 最初に登録されたデバイス以外にDELETEボタンを表示する */}
-              {(id !== 0) &&
-                < Button onClick={() => handleDeleteDevice(device[0])}>DELETE</Button>
+              {(window.localStorage.getItem('deviceAlias') === device[0])
+                ? <span className="italic opacity-70 pr-3">this device</span>
+                : < Button onClick={() => handleDeleteDevice(device[0])}>DELETE</Button>
               }
             </li>
           ))}
