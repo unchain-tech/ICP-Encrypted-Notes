@@ -23,17 +23,5 @@ export const useDevices = () => {
     }
   }
 
-  const deleteDevice = async (alias: string) => {
-    try {
-      // デバイスの削除
-      await loginUser?.actor.deleteDevice(alias)
-
-      // デバイス一覧の再取得
-      getDevices()
-    } catch (err) {
-      alert(`Error deleteDevice(): ${err}`)
-    }
-  }
-
-  return { getDevices, deleteDevice, devices }
+  return { getDevices, devices }
 }
