@@ -9,18 +9,13 @@ import {
   createActor
 } from "../../../declarations/encrypted_notes_backend";
 import { useLoginUser } from "./useLoginUser";
-import { Crypto } from '../lib/crypto'
-
-function encrypt(): void {
-  alert("Call encrypt function");
-}
+import { CryptoService } from '../lib/crypto'
+import { User } from "../types/data";
 
 export const useAuth = () => {
   // 認証成功時にページをリダイレクトするために使用
   const navigate = useNavigate()
   const { loginUser, setLoginUser } = useLoginUser()
-  // 認証成功時にデバイス登録を行うために必要
-  const { registerDevice } = Crypto()
 
   const login = async () => {
 
@@ -62,14 +57,18 @@ export const useAuth = () => {
         }
         const actor = createActor(BackendId, options)
 
-        setLoginUser({
+        const loginUser: User = {
           identity: principal,
           actor: actor,
-        })
+        }
+
+        setLoginUser(loginUser)
 
         // ===== クリプト関連の処理を実行 =====
-        encrypt()//TODO delete
-        await registerDevice()
+        const cryptoService = new CryptoService(loginUser);
+        const initialized = await cryptoService.init().catch((error) => console.log(`crypto: ${error}`))
+
+        console.log(`initialized: ${initialized}`);
 
         // ページリダイレクトをする
         navigate("/newNote")
