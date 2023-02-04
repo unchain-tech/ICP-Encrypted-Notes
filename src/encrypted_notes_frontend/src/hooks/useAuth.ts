@@ -10,6 +10,7 @@ import {
 } from "../../../declarations/encrypted_notes_backend";
 import { useLoginUser } from "./useLoginUser";
 import { CryptoService } from '../lib/crypto'
+import { sleep } from "../lib/sleep";
 import { User } from "../types/data";
 
 export const useAuth = () => {
@@ -60,15 +61,68 @@ export const useAuth = () => {
         const loginUser: User = {
           identity: principal,
           actor: actor,
+          status: "synchronizing",
         }
 
         setLoginUser(loginUser)
 
         // ===== クリプト関連の処理を実行 =====
         const cryptoService = new CryptoService(loginUser);
-        const initialized = await cryptoService.init().catch((error) => console.log(`crypto: ${error}`))
+        const initialized
+          = await cryptoService
+            .init()
+            .catch(
+              (error) => console.log(`Could not initialize crypto service: ${error}`)
+            )
 
-        console.log(`initialized: ${initialized}`);
+        if (initialized) {
+          console.log(`1== initialized: ${initialized}`); // TODO delete
+
+          // ユーザー情報として`initialized`を登録する
+          const loginUser: User = {
+            identity: principal,
+            actor: actor,
+            status: "initialized",
+          }
+
+          setLoginUser(loginUser)
+        } else {
+          console.log(`2== initialized: ${initialized}`); // TODO delete
+
+          // ユーザー情報として`synchronizing`を登録する
+          const loginUser: User = {
+            identity: principal,
+            actor: actor,
+            status: "synchronizing",
+          }
+
+          setLoginUser(loginUser)
+
+          while (true) {
+            await sleep(1000)
+            try {
+              const initialized = await cryptoService.pollForSynchronize()
+              console.log(`3== initialized: ${initialized}`) //TODO delete
+
+              // ユーザー情報として`initialized`を登録する
+              if (initialized) {
+                const loginUser: User = {
+                  identity: principal,
+                  actor: actor,
+                  status: "synchronizing",
+                }
+
+                setLoginUser(loginUser)
+
+                break
+              }
+            } catch (error) {
+              alert("Could not check synchronization status")
+              console.log(`Could not check synchronization status: ${error}`)
+              return
+            }
+          }
+        }
 
         // ページリダイレクトをする
         navigate("/newNote")
@@ -115,6 +169,7 @@ export const useAuth = () => {
         setLoginUser({
           identity: principal,
           actor: actor,
+          status: "initialized", // TODO: ここ問題ないかチェックする
         })
       } else {
         console.log(`isAuthenticated: ${resultAuthenticated}`);

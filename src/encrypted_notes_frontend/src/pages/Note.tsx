@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { Routes, Route, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import Button from '../components/Button'
 import Layout from '../components/layout/Layout'

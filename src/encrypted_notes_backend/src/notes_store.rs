@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use candid::CandidType;
 use ic_cdk::export::Principal;
+use std::collections::HashMap;
 
 #[derive(CandidType, Clone, Debug)]
 pub struct EncryptedNote {
