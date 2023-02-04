@@ -4,9 +4,12 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "ignorePatterns": "**/webpack.config.js",
   "rules": {
-    "no-undef": "off"
+    "no-undef": "off",
+    "no-constant-condition": "off"
   }
 }
