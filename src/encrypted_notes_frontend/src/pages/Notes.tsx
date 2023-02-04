@@ -1,15 +1,28 @@
-import { memo, FC } from 'react'
+import { memo, FC, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Note } from '../types/data'
 import Layout from '../components/layout/Layout'
 
-type Props = {
-  notes: Note[]
-}
+import { useLoginUser } from '../hooks/useLoginUser'
 
-const Notes: FC<Props> = memo((props) => {
-  const { notes } = props
+const Notes: FC = memo(() => {
+  const { loginUser } = useLoginUser()
+  const [notes, setNotes] = useState<Note[]>([])
+
+  const getNotes = async () => {
+    try {
+      const saveNotes = await loginUser?.actor.getNotes()
+      setNotes(saveNotes)
+    } catch (error) {
+      alert(`${error}`)
+    }
+  }
+
+  useEffect(() => {
+    getNotes()
+  })
+
   return (
     <Layout>
       <span>Your Notes</span>
