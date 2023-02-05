@@ -1,4 +1,3 @@
-import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent } from "@dfinity/agent";
@@ -72,7 +71,7 @@ export const useAuth = () => {
           = await cryptoService
             .init()
             .catch(
-              (error) => console.log(`Could not initialize crypto service: ${error}`)
+              (error: Error) => console.log(`Could not initialize crypto service: ${error}`)
             )
 
         if (initialized) {
@@ -175,14 +174,9 @@ export const useAuth = () => {
         console.log(`isAuthenticated: ${resultAuthenticated}`);
       }
     } catch (error) {
-      console.log(`checkClientIdentity: ${error}`);
+      throw new Error("Failed re-authentication")
     }
   }
-
-  // ページがリロードされた時、以下の関数を実行
-  // useEffect(() => {
-  //   isAuthenticated()
-  // }, [])
   return { login, isAuthenticated }
 }
 
