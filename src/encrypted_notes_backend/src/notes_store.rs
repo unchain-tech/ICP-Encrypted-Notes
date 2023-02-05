@@ -19,6 +19,16 @@ impl NotesStore {
         self.notes_store.get(&caller).cloned().unwrap_or_default()
     }
 
+    pub fn get_note(&self, caller: Principal, id: u128) -> EncryptedNote {
+        self.notes_store
+            .get(&caller)
+            .cloned()
+            .unwrap_or_default()
+            .get(id as usize)
+            .cloned()
+            .expect("Not Found")
+    }
+
     pub fn add_note(&mut self, caller: Principal, encrypted_text: String) -> u128 {
         let id = self.id;
         self.id += 1;

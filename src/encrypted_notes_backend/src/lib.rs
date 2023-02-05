@@ -130,6 +130,13 @@ fn get_notes() -> Vec<EncryptedNote> {
     NOTES_STORE.with(|notes_store| notes_store.borrow().get_notes(caller))
 }
 
+#[query(name = "getNote")]
+fn get_note(id: u128) -> EncryptedNote {
+    let caller = get_authed_user();
+
+    NOTES_STORE.with(|notes_store| notes_store.borrow().get_note(caller, id))
+}
+
 #[update(name = "addNote")]
 fn add_note(encrypted_text: String) -> u128 {
     let caller = get_authed_user();

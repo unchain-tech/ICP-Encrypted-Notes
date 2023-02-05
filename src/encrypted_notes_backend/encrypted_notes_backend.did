@@ -36,6 +36,7 @@ service : {
   "uploadEncryptedSecrets": (vec record {PublicKey; EncryptedSecret;}) -> ();
   "getEncryptedSecrets": (PublicKey) -> (GetSecretResult) query;
   "getNotes": () -> (vec EncryptedNote) query;
+  "getNote": (nat) -> (EncryptedNote) query;
   "addNote": (text) -> (nat);
   "updateNote": (nat, text) -> ();
   "deleteNote": (nat) -> ();
