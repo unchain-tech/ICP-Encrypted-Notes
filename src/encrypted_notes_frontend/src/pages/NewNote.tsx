@@ -1,12 +1,14 @@
-import { memo, FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import Layout from '../components/layout/Layout'
-import Button from '../components/Button'
-import TextInput from '../components/TextInput'
-
+import { useAuth } from '../hooks/useAuth'
 import { useLoginUser } from '../hooks/useLoginUser'
+import Layout from '../components/Layout'
+import Note from '../components/Note'
 
-const NewNote: FC = memo(() => {
+const NewNote: FC = () => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const [note, setNote] = useState('')
   const { loginUser } = useLoginUser()
 
@@ -20,24 +22,26 @@ const NewNote: FC = memo(() => {
     setNote('')
   }
 
+  useEffect(() => {
+    try {
+      isAuthenticated()
+    } catch (error) {
+      alert(error)
+      navigate("/")
+    }
+  }, [])
+
   return (
     <Layout>
       <span>New Note</span>
-      <main className="p-4">
-        {/* <TextInput text="" /> */}
-        <textarea
-          id="message"
-          rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Your message..."
-          value={note}
-          onChange={handleChange}
-        >
-        </textarea>
-      </main>
-      <Button onClick={handleClick}>ADD</Button>
+      <Note
+        note={note}
+        buttonTitle="ADD"
+        handleChange={handleChange}
+        handleClick={handleClick}
+      />
     </Layout>
   )
-})
+}
 
 export default NewNote

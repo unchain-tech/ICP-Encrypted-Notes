@@ -1,6 +1,7 @@
 import { memo, FC } from 'react'
-import Button from '../components/Button'
+
 import { useAuth } from '../hooks/useAuth'
+import Button from '../components/Button'
 
 const Login: FC = memo(() => {
   const { login } = useAuth()

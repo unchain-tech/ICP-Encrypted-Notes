@@ -1,23 +1,34 @@
-import { memo, FC, useEffect } from 'react'
-
-import type { Device } from '../types/data'
-import Layout from '../components/layout/Layout'
-import Button from '../components/Button'
-import { useDevices } from '../hooks/useDevices'
+import { FC, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import { useLoginUser } from '../hooks/useLoginUser'
+import type { Device } from '../types/data'
+import Button from '../components/Button'
+import Layout from '../components/Layout'
 
-const DeviceManagement: FC = memo(() => {
+const Devices: FC = () => {
+  const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const { loginUser } = useLoginUser()
-  const { getDevices, devices } = useDevices()
+  const [devices, setDevices] = useState<Device[]>([])
+
+  const getDevices = async () => {
+    try {
+      // デバイス一覧を取得する
+      console.log(`loginUser.identity: ${loginUser?.identity}`) // TODO: delete
+      const res = await loginUser?.actor.getDevices()
+      console.log(`getDevices: ${res?.length}`)
+      setDevices(res)
+    } catch (err) {
+      alert(`Error getDevices(): ${err}`)
+    }
+  }
 
   // デバイスを削除するイベントハンドラ
   const handleDeleteDevice = async (alias: string) => {
     alert(`Delete ${alias}?`);
 
-    // deleteDevice(alias)
     try {
       // デバイスの削除
       await loginUser?.actor.deleteDevice(alias)
@@ -31,9 +42,14 @@ const DeviceManagement: FC = memo(() => {
 
   useEffect(() => {
     // ユーザー認証がされている場合、デバイス一覧を取得する
-    isAuthenticated().then(() => {
-      getDevices()
-    })
+    try {
+      isAuthenticated().then(() => {
+        getDevices()
+      })
+    } catch (error) {
+      alert(error)
+      navigate("/")
+    }
   }, [])
 
   return (
@@ -62,6 +78,6 @@ const DeviceManagement: FC = memo(() => {
       </main>
     </Layout >
   )
-})
+}
 
-export default DeviceManagement
+export default Devices
