@@ -110,15 +110,21 @@ dfx canister call encrypted_notes_backend getEncryptedSecrets '("PUBLIC_KEY_2")'
 # (variant { Err = variant { Unknown } })
 
 echo "# ---------------------"
-echo "#      ノートの操作     "
+echo "#      ノートの追加     "
 echo "# ---------------------"
-# ノートを追加する
 dfx canister call encrypted_notes_backend addNote '("First text!")'
 # (0 : nat)
 dfx canister call encrypted_notes_backend addNote '("Second text!")'
 # (1 : nat)
 
-# ノート一覧を取得する
+echo "# ---------------------"
+echo "#      ノートの取得     "
+echo "# ---------------------"
+dfx canister call encrypted_notes_backend getNote '(0)'
+
+echo "# ------------------------"
+echo "#      ノート一覧の取得      "
+echo "# ------------------------"
 dfx canister call encrypted_notes_backend getNotes
 #(
 #  vec {
@@ -127,7 +133,9 @@ dfx canister call encrypted_notes_backend getNotes
 #  },
 #)
 
-# ノートを編集する
+echo "# ---------------------"
+echo "#      ノートの編集     "
+echo "# ---------------------"
 dfx canister call encrypted_notes_backend updateNote '(0, "Edit first text!")'
 # ()
 
@@ -140,7 +148,9 @@ dfx canister call encrypted_notes_backend getNotes
 #  },
 #)
 
-# ノートを削除する
+echo "# ---------------------"
+echo "#      ノートの削除     "
+echo "# ---------------------"
 dfx canister call encrypted_notes_backend deleteNote '(1)'
 # ()
 
