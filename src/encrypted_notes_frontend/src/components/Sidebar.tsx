@@ -1,17 +1,17 @@
-import { FC, memo } from "react";
+import { FC } from "react";
 import { Link } from "react-router-dom";
 
 const category =
   'flex items-center space-x-1 rounded-md px-2 py-3 hover:bg-gray-100 hover:text-blue-600';
 
-const Sidebar: FC = memo(() => {
+const Sidebar: FC = () => {
   return (
     <aside className="flex w-72 flex-col space-y-2 border-r-2 border-gray-200 bg-white p-2">
       <div className="flex items-center justify-center mt-10">
         <Link to="/">Encrypted Notes</Link>
       </div>
       <nav className="mit-10">
-        <Link to="/newNote" className={category}>
+        <Link to="/new" className={category}>
           <span>New Note</span>
         </Link>
         <Link to="/notes" className={category}>
@@ -26,6 +26,6 @@ const Sidebar: FC = memo(() => {
       </nav>
     </aside>
   )
-})
+}
 
 export default Sidebar;

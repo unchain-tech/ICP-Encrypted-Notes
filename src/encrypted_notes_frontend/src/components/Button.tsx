@@ -1,11 +1,11 @@
-import { memo, FC, ReactNode } from 'react'
+import { FC, ReactNode } from 'react'
 
 type Props = {
   children: ReactNode
   onClick?: () => void
 }
 
-const Button: FC<Props> = memo((props) => {
+const Button: FC<Props> = (props) => {
   const { children, onClick } = props
 
   return (
@@ -16,6 +16,6 @@ const Button: FC<Props> = memo((props) => {
       {children}
     </button>
   )
-})
+}
 
 export default Button
