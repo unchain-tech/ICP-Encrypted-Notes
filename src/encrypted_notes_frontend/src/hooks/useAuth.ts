@@ -62,14 +62,17 @@ export const useAuth = () => {
         const loginUser: User = {
           identity: principal,
           actor: actor,
+          cryptoService: undefined,
           // status: "synchronizing",
         }
-
-        setLoginUser(loginUser)
 
         // ===== クリプト関連の処理を実行 =====
         const cryptoService = new CryptoService(loginUser);
         await cryptoService.init();
+
+        loginUser.cryptoService = cryptoService;
+
+        setLoginUser(loginUser)
 
         // ページリダイレクトをする
         navigate("/new")
@@ -88,41 +91,48 @@ export const useAuth = () => {
       return;
     }
     console.log("Call isAuthenticated")
-    try {
-      const authClient = await AuthClient.create();
-      const resultAuthenticated = await authClient.isAuthenticated();
-      // 認証済みであればPrincipalを取得
-      if (resultAuthenticated) {
-        // 認証したユーザーの`identity`を取得
-        const identity = authClient.getIdentity()
 
-        // 認証したユーザーの`prinicpal`を取得
-        const principal = identity.getPrincipal()
+    const authClient = await AuthClient.create();
+    const resultAuthenticated = await authClient.isAuthenticated();
+    // 認証済みであればPrincipalを取得
+    if (resultAuthenticated) {
+      // 認証したユーザーの`identity`を取得
+      const identity = authClient.getIdentity()
 
-        console.log(`isAuthenticated principal: ${principal}`) // TODO delete
-        // ICと対話する`agent`を作成する
-        const newAgent = new HttpAgent({ identity });
-        // ローカル環境の`agent`はICの公開鍵を持っていないため、`fetchRootKey()`で鍵を取得する
-        if (process.env.DFX_NETWORK === "local") {
-          newAgent.fetchRootKey();
-        }
+      // 認証したユーザーの`prinicpal`を取得
+      const principal = identity.getPrincipal()
 
-        // identityを認証したユーザー情報でアクターを生成する
-        const options = {
-          agent: newAgent
-        }
-        const actor = createActor(BackendId, options)
-
-        setLoginUser({
-          identity: principal,
-          actor: actor,
-          // status: "initialized", // TODO: ここ問題ないかチェックする
-        })
-      } else {
-        console.log(`isAuthenticated: ${resultAuthenticated}`);
+      console.log(`isAuthenticated principal: ${principal}`) // TODO delete
+      // ICと対話する`agent`を作成する
+      const newAgent = new HttpAgent({ identity });
+      // ローカル環境の`agent`はICの公開鍵を持っていないため、`fetchRootKey()`で鍵を取得する
+      if (process.env.DFX_NETWORK === "local") {
+        newAgent.fetchRootKey();
       }
-    } catch (error) {
-      throw new Error("Failed re-authentication")
+
+      // identityを認証したユーザー情報でアクターを生成する
+      const options = {
+        agent: newAgent
+      }
+      const actor = createActor(BackendId, options)
+
+      const loginUser: User = {
+        identity: principal,
+        actor: actor,
+        cryptoService: undefined,
+        // status: "synchronizing",
+      }
+
+      // TODO: CryptoServiceインスタンスの再生成が問題ないか確認
+      const cryptoService = new CryptoService(loginUser);
+      // TODO: init関数の呼び出しで問題ないか確認→必要に応じて、クラスのメンバ変数を設定する別の関数を定義
+      await cryptoService.init();
+
+      loginUser.cryptoService = cryptoService;
+
+      setLoginUser(loginUser);
+    } else {
+      console.log(`isAuthenticated: ${resultAuthenticated}`);
     }
   }
   return { login, isAuthenticated }

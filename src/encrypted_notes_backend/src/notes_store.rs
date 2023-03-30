@@ -10,6 +10,7 @@ pub struct EncryptedNote {
 
 #[derive(Default)]
 pub struct NotesStore {
+    // TODO: Vec<EncryptedNote>をHashMap<id, string>にした方が良い
     pub notes_store: HashMap<Principal, Vec<EncryptedNote>>,
     pub id: u128,
 }

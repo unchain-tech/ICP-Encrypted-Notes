@@ -13,12 +13,24 @@ const Notes: FC = () => {
   const [notes, setNotes] = useState<EncryptedNote[]>([])
 
   const getNotes = async () => {
+    if ((loginUser === null) || (loginUser.cryptoService === undefined)) {
+      console.log(`Undefined loginUser`);
+      return;
+    }
     try {
       // ノート一覧を取得する
-      console.log(`loginUser.identity: ${loginUser?.identity}`) // TODO: delete
-      const userNotes: EncryptedNote[] = await loginUser?.actor.getNotes()
-      console.log(`getNotes: ${userNotes?.length}`)
-      setNotes(userNotes)
+      const userNotes: EncryptedNote[] = await loginUser.actor.getNotes()
+      const decryptedNotes = new Array<EncryptedNote>();
+      for (const encryptedNote of userNotes) {
+        console.log(`No. ${encryptedNote.id}: ${encryptedNote.encrypted_text}`);
+        // ノートを復号する
+        const decryptedNote = await loginUser.cryptoService.decryptNote(encryptedNote.encrypted_text);
+        decryptedNotes.push({
+          id: encryptedNote.id,
+          encrypted_text: decryptedNote,
+        });
+      }
+      setNotes(decryptedNotes)
     } catch (error) {
       alert(`Error getNotes(): ${error}`)
     }
@@ -56,7 +68,7 @@ const Notes: FC = () => {
           {notes.map((note: EncryptedNote) => (
             <div
               className="p-4 rounded-md border border-base-300 bg-base hover:-translate-y-2 transition-transform truncate"
-              key={note.encrypted_text}
+              key={`${note.id}${note.encrypted_text}`}
             >
               <Link to={`/notes/${note.id}`}>
                 <div className="pointer-events-none">

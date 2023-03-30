@@ -1,26 +1,20 @@
 import { v4 as uuidV4 } from 'uuid';
 import { User } from '../types/data';
 
+import { GetSecretResult, EncryptedSecret, SecretError } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import { loadKey, storeKey } from './keyStorage';
 
 export class CryptoService {
+  static readonly INIT_VECTOR_VALUE = 12;
   private deviceAlias: string | null = null;
   private loginUser: User;
   private publicKey: CryptoKey | undefined = undefined;
   private privateKey: CryptoKey | undefined = undefined;
+  private symmetricKey: CryptoKey | undefined = undefined;
 
   /** ステップ4: constructorとinit関数の定義 */
   constructor(loginUser: User) {
     this.loginUser = loginUser;
-    //   // デバイス名を取得
-    //   // const deviceAlias = window.localStorage.getItem('deviceAlias');
-    //   if (deviceAlias) {
-    //     this.deviceAlias = deviceAlias;
-    //   } else {
-    //     this.deviceAlias = uuidV4();
-    //     window.localStorage.setItem('deviceAlias', this.deviceAlias);
-    //   }
-    //   console.log('deviceAlias: ' + this.deviceAlias);
   }
 
   // デバイスエイリアスとキーを生成する
@@ -31,52 +25,85 @@ export class CryptoService {
      * 今回deviceAliasはwindow.localStorageに保存する。
      *  */
     // ローカルストレージからデバイスエイリアスを取得し、存在しない場合は生成する。
-    // TODO: この部分の処理は、必要があればconstructorに移動する
-    this.deviceAlias = window.localStorage.getItem('deviceAlias');
-    if (!this.deviceAlias) {
-      this.deviceAlias = uuidV4();
-      window.localStorage.setItem('deviceAlias', this.deviceAlias);
-    }
-    console.log(`deviceAlias: ${this.deviceAlias}`);// TODO: delete
+    try {
+      this.deviceAlias = window.localStorage.getItem('deviceAlias');
+      if (!this.deviceAlias) {
+        this.deviceAlias = uuidV4();
+        window.localStorage.setItem('deviceAlias', this.deviceAlias);
+      }
+      console.log(`deviceAlias: ${this.deviceAlias}`);// TODO: delete
 
-    // キーペアをデータベースから取得し、存在しない場合は生成する。
-    this.publicKey = await loadKey('publicKey');
-    this.privateKey = await loadKey('privateKey');
-    if (!this.publicKey || !this.privateKey) {
-      const keyPair: CryptoKeyPair = await this.generateKeyPair();
+      // キーペアをデータベースから取得し、存在しない場合は生成する。
+      this.publicKey = await loadKey('publicKey');
+      this.privateKey = await loadKey('privateKey');
+      if (!this.publicKey || !this.privateKey) {
+        const keyPair: CryptoKeyPair = await this.generateKeyPair();
 
-      await storeKey('publicKey', keyPair.publicKey);
-      await storeKey('privateKey', keyPair.privateKey);
+        await storeKey('publicKey', keyPair.publicKey);
+        await storeKey('privateKey', keyPair.privateKey);
 
-      this.publicKey = keyPair.publicKey;
-      this.privateKey = keyPair.privateKey;
-    }
+        this.publicKey = keyPair.publicKey;
+        this.privateKey = keyPair.privateKey;
+      }
 
-    // publicKeyをexportしてBase64に変換する
-    const exported = await window.crypto.subtle.exportKey('spki', this.publicKey);
-    const convertedPublicKey = this.arrayBufferToBase64(exported);
+      // publicKeyをexportしてBase64に変換する
+      const exportedPublicKey = await window.crypto.subtle.exportKey('spki', this.publicKey);
+      const encodedPublicKey = this.arrayBufferToBase64(exportedPublicKey);
 
-    // 親デバイスとなる場合、対称鍵を作成する
-    const isSeed = await this.loginUser.actor.isSeed();
-    console.log(`isSeed: ${isSeed}`); // TODO: delete
-    if (isSeed) {
-      const symmetricKey: CryptoKey = await this.generateSymmetricKey();
-      // symmetricKeyを自身のpublicKeyで暗号化をする
-      const encrypted = await this.encryptSymmetricKey(symmetricKey, this.publicKey);
-      console.log(`encrypted: ${encrypted}`); // TODO: delete
-      // Base64に変換する
-      const convertedEncryptedSymmetricKey = this.arrayBufferToBase64(encrypted);
+      // デバイスエイリアスとPublicKeyをバックエンドキャニスターに保存する
+      const result = await this.loginUser.actor.registerDevice(this.deviceAlias, encodedPublicKey);
+      if (result) {
+        console.log(`registerDevice result: ${result}`);
+      } else {
+        console.log(`Already registered!`);
+      }
 
-      const result = await this.loginUser.actor.uploadSeedSecret(convertedPublicKey, convertedEncryptedSymmetricKey);
-      console.log(`uploadSeedSecret: ${result}`);
-    }
+      // 親デバイスとなる場合、対称鍵を作成する
+      const isSeed = await this.loginUser.actor.isSeed();
+      console.log(`isSeed: ${isSeed}`); // TODO: delete
+      if (isSeed) {
+        this.symmetricKey = await this.generateSymmetricKey();
+        // symmetricKeyを自身のpublicKeyで暗号化をする
+        const encryptedSymmetricKey = await this.encryptSymmetricKey(this.symmetricKey, this.publicKey);
+        console.log(`encrypted: ${encryptedSymmetricKey}`); // TODO: delete
+        // Base64に変換する
+        const encodedEncryptedSymmetricKey = this.arrayBufferToBase64(encryptedSymmetricKey);
 
-    // デバイスエイリアスとPublicKeyをバックエンドキャニスターに保存する
-    const result = await this.loginUser.actor.registerDevice(this.deviceAlias, convertedPublicKey);
-    if (result.Ok) {
-      console.log(`registerDevice result: ${result.Ok}`);
-    } else {
-      alert(`${Object.keys(result.Err)[0]}`);
+        const result = await this.loginUser.actor.uploadSeedSecret(encodedPublicKey, encodedEncryptedSymmetricKey);
+        console.log(`uploadSeedSecret: ${result}`);
+        alert('Uploaded encrypted symmetricKey.');
+      } else {
+        console.log('Synchronize key...');
+
+        /** ステップ5: 鍵の同期処理 */
+        // 以下の処理は、isSeedと最初に認定されたブラウザ上でのみ有効の臨時処理（ノートの暗号化・復号をテストするため）
+        // ステップ5のTODOを実装する必要がある。また、そのTODOが実装出来次第、削除する
+        const encryptedSymmetricKey: GetSecretResult = await this.loginUser.actor.getEncryptedSecrets(encodedPublicKey);
+        if ('Err' in encryptedSymmetricKey) {
+          if ('Unknown' in encryptedSymmetricKey.Err) {
+            alert('Unknown user');
+            return;
+          }
+          if ('NotSynced' in encryptedSymmetricKey.Err) {
+            alert('Not Synced');
+            return;
+          }
+        }
+        if ('Ok' in encryptedSymmetricKey) {
+          const decodedEncryptedSymmetricKey: ArrayBuffer = this.base64ToArrayBuffer(encryptedSymmetricKey.Ok);
+
+          // 暗号化されたSymmetricKeyを復号する
+          this.symmetricKey = await this.decryptSymmetricKey(decodedEncryptedSymmetricKey, this.privateKey);
+        }
+        // TODO: 鍵の同期処理を行う
+        // バックエンドキャニスターに保存されている時
+        // 取得->自身の所有するprivateKeyで復号する->メンバ変数にセットする
+
+        // バックエンドキャニスターに保存されていない時
+        // // 親デバイスによる鍵の同期処理を待つ必要がある
+      }
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -112,8 +139,6 @@ export class CryptoService {
       true,
       ["encrypt", "decrypt"]
     );
-
-    console.log(`in generateKeyPair: ${keyPair}`);// TODO: delete
     return keyPair;
   }
 
@@ -162,57 +187,105 @@ export class CryptoService {
     return symmetricKey;
   }
 
-  /** ステップ3: メモの暗号化・復号 */
-  // 対称鍵でメモを暗号化する
-  async encryptMemo(symmetricKey: CryptoKey, memoText: string): Promise<ArrayBuffer> {
+  /** ステップ3: ノートの暗号化・復号 */
+  // 対称鍵でノートを暗号化する
+  async encryptNote(note: string): Promise<string> {
+    console.log(`=== in encryptNote ===`); // TODO: delete
+    if (!this.symmetricKey) {
+      throw new Error("Not found Symmetric Key.");
+    }
+
     // 12バイトの初期化ベクター（IV）を生成する。
     // 同じ鍵で複数回の暗号化操作を行う際に、それぞれの暗号文が異なるようにするために使用される。
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const iv = window.crypto.getRandomValues(new Uint8Array(CryptoService.INIT_VECTOR_VALUE));
+
+    // 引数で受け取った文字列を、ArrayBufferに変換する。
+    // TextEncoderを使ってUTF-8でエンコードする。
     const encoder = new TextEncoder();
+    const encodedNote = encoder.encode(note);
+
+
     // 対称鍵を使って、テキストデータを暗号化する
-    const encryptedMemo = await window.crypto.subtle.encrypt(
+    const encryptedNote = await window.crypto.subtle.encrypt(
       {
         name: "AES-GCM",
         iv: iv,
       },
-      symmetricKey,
-      encoder.encode(memoText)
+      this.symmetricKey,
+      encodedNote,
     );
-    return encryptedMemo; // メモとIVを連結してArrayBufferに保存している
+
+    console.log(`iv.byteLength: ${iv.byteLength}`);
+    console.log(`encryptedNote.byteLength: ${encryptedNote.byteLength}`);
+    // テキストデータとIVを連結して（IVは、復号時に再度利用されるため）ArrayBufferに保存されたものを変換して返す。
+    // ArrayBufferをstringに変換する
+    const decodedIv = this.arrayBufferToBase64(iv);
+    const decodedEncryptedNote = this.arrayBufferToBase64(encryptedNote);
+
+    console.log(`decodedIv: ${decodedIv}`); // TODO: delete
+    console.log(`decodedEncryptedNote: ${decodedEncryptedNote}`); // TODO: delete
+    return decodedIv + decodedEncryptedNote;
   }
 
+  // 対称鍵で暗号化されたノートを復号する
+  async decryptNote(data: string): Promise<string> {
+    console.log(`=== in decryptNote ===`); // TODO: delete
 
-  // 対称鍵で暗号化されたメモを復号する
-  async decryptMemo(symmetricKey: CryptoKey, encryptedMemo: ArrayBuffer): Promise<string> {
-    // encryptedMemoの最初の12バイトをIVとして抽出する。これをもとにデータを復号する
-    const iv = new Uint8Array(encryptedMemo, 0, 12);
-    // ArrayBuffer形式のデータを文字列に変換するために使用
-    const decoder = new TextDecoder();
-    const decryptedData = await window.crypto.subtle.decrypt(
+    if (!this.symmetricKey) {
+      throw new Error("Not found Symmetric Key.");
+    }
+
+    // 取得したデータをIVとノートデータに分ける
+    const base64IvLength = (CryptoService.INIT_VECTOR_VALUE / 3) * 4;
+    const decodedIv = data.slice(0, base64IvLength);
+    const decodedEncryptedNote = data.slice(base64IvLength);
+    console.log(`decodedIv: ${decodedIv}`); // TODO: delete
+    console.log(`decodedEncryptedNote: ${decodedEncryptedNote}`); // TODO: delete
+
+    // 一文字ずつcharCodeAtでUnicode値に変換し、その値をUint8Arrayに格納する
+    const encodedIv = this.base64ToArrayBuffer(decodedIv);
+    console.log(`encodedIv.toString(): ${encodedIv.toString()}`); // TODO: delete
+    console.log(`encodedIv.byteLength: ${encodedIv.byteLength}`); // TODO: delete
+
+    const encodedNote = this.base64ToArrayBuffer(decodedEncryptedNote);
+    console.log(`encodedNote.toString(): ${encodedNote.toString()}`); // TODO: delete
+    console.log(`encodedNote.byteLength: ${encodedNote.byteLength}`); // TODO: delete
+    /** */
+
+    const decryptedNote = await window.crypto.subtle.decrypt(
       {
         name: "AES-GCM",
-        iv,
+        iv: encodedIv,
       },
-      symmetricKey,
-      encryptedMemo
+      this.symmetricKey,
+      encodedNote
     );
-    return decoder.decode(decryptedData);
-  }
+    console.log(`decryptedNote.byteLength: ${decryptedNote.byteLength}`); // TODO: delete
 
-  private arrayBufferToBase64(key: ArrayBuffer): string {
-    const keyAsString = this.ab2str(key);
-    console.log(`exportedAsString: ${keyAsString}`); // TODO: delete
-    const keyAsBase64 = window.btoa(keyAsString);
-    console.log(`exportedAsBase64: ${keyAsBase64}`); // TODO: delete
+    const decoder = new TextDecoder();
+    const decodedDecryptedNote = decoder.decode(decryptedNote);
+    console.log(`decodedDecryptedNote: ${decodedDecryptedNote}`); // TODO: delete
 
-    return keyAsBase64;
+    return decodedDecryptedNote;
   }
 
   /**
+   * 参考：
    * Convert an ArrayBuffer into a string
    * from https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string/
    */
-  private ab2str(buf: ArrayBuffer): string {
-    return String.fromCharCode.apply(undefined, Array.from(new Uint8Array(buf)));
+  private arrayBufferToBase64(arrayBufferData: ArrayBuffer): string {
+    // ステップ１：new Uint8Array()でArrayBufferの中身を一要素１バイトの配列にする。
+    // ステップ２：文字コード（Uint8Arrayには文字が数値として格納されている）を文字（string）として扱うために、String.fromCharCodeで変換をする。
+    const stringData = String.fromCharCode(...new Uint8Array(arrayBufferData));
+    // Base64エンコードを行う。
+    return window.btoa(stringData);
+  }
+
+  private base64ToArrayBuffer(base64Data: string): ArrayBuffer {
+    // Base64エンコードされたデータを、バイトにデコード→デコードしたバイトを文字列にエンコードする。
+    const stringData = window.atob(base64Data);
+    // 一文字ずつcharCodeAt()でUnicode値に変換し、その値をUint8Arrayに格納する。
+    return Uint8Array.from(stringData, dataChar => dataChar.charCodeAt(0));
   }
 }

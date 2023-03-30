@@ -113,6 +113,10 @@ impl DevicesStore {
         }
     }
 
+    // 最初に登録されるデバイスかどうかをbooleanで返す関数。
+    // 判定方法は、keys<PublicKey: EncryptedSymmetricKey>にデータが保存されているかどうかを確認している。
+    // keysが空：最初に登録されるデバイス
+    // keysは既にデータあり：2番目以降に登録されるデバイス
     pub fn is_seed(&self, caller: Principal) -> bool {
         let user_keys = self.keys.get(&caller).expect("No user is registered.");
         user_keys.is_empty()

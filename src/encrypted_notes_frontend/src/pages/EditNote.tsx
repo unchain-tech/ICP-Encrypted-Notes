@@ -8,19 +8,31 @@ import Button from '../components/Button'
 import Layout from '../components/Layout'
 import Note from '../components/Note'
 
+type decryptedNote = {
+  id: bigint,
+  note: string,
+};
+
 const EditNote: FC = () => {
   const params = useParams()
   const navigate = useNavigate()
   const { loginUser } = useLoginUser()
   const { isAuthenticated } = useAuth()
   const [noteId] = useState(Number(params.noteId))
-  const [note, setNote] = useState<EncryptedNote>()
+  const [note, setNote] = useState<decryptedNote>()
 
   const getNote = async () => {
+    if ((loginUser === null) || (loginUser.cryptoService === undefined)) {
+      console.log(`Undefined loginUser`);
+      return;
+    }
     try {
       const userNote: EncryptedNote = await loginUser?.actor.getNote(BigInt(noteId))
-      console.log(`getNote: ${userNote.id}`)
-      setNote(userNote)
+      console.log(`getNote id: ${userNote.id}`)
+      // ノートを復号する
+      const decryptedNote = await loginUser.cryptoService.decryptNote(userNote.encrypted_text);
+
+      setNote({ id: userNote.id, note: decryptedNote })
     } catch (error) {
       alert(`Error: ${error}`)
     }
@@ -32,7 +44,7 @@ const EditNote: FC = () => {
     }
     setNote({
       id: BigInt(noteId),
-      encrypted_text: event.target.value
+      note: event.target.value
     })
   }
 
@@ -40,11 +52,18 @@ const EditNote: FC = () => {
     if (note === undefined) {
       return
     }
+    if ((loginUser === null) || (loginUser.cryptoService === undefined)) {
+      console.log(`Undefined loginUser`);
+      return;
+    }
     try {
-      await loginUser?.actor.updateNote(note.id, note.encrypted_text)
+      // ノートの暗号化を行う
+      const encryptedNote = await loginUser.cryptoService.encryptNote(note.note);
+
+      await loginUser.actor.updateNote(note.id, encryptedNote)
       setNote({
         id: BigInt(noteId),
-        encrypted_text: note.encrypted_text
+        note: note.note
       })
       alert(`Save note.`)
     } catch (error) {
@@ -84,7 +103,7 @@ const EditNote: FC = () => {
         <Button onClick={handleClickDelete}>DELETE</Button>
       </div>
       <Note
-        note={note?.encrypted_text}
+        note={note?.note}
         buttonTitle="SAVE"
         handleChange={handleChange}
         handleClick={handleClick}

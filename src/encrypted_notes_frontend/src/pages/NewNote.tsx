@@ -17,7 +17,28 @@ const NewNote: FC = () => {
   }
 
   const handleClick = async () => {
-    const id = await loginUser?.actor.addNote(note)
+    // const encryptedNote = (await encryptNote(note, crypto))
+    // const id = await loginUser?.actor.addNote(encryptedNote)
+
+    alert(`Note: ${note}`);
+
+    if ((loginUser === null) || (loginUser.cryptoService === undefined)) {
+      console.log(`Undefined loginUser`);
+      return;
+    }
+
+    // ノートの暗号化を行う
+    const encryptedNote = await loginUser.cryptoService.encryptNote(note);
+
+    if (encryptedNote === undefined) {
+      alert('Error encrypted note');
+      setNote('');
+      return;
+    }
+
+    console.log(`Encrypted Note: \n${encryptedNote}`);
+
+    const id = await loginUser?.actor.addNote(encryptedNote)
     alert(`Note no.${id} added`)
     setNote('')
   }
