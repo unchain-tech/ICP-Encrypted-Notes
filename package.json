@@ -17,9 +17,13 @@
     "generate": "dfx generate encrypted_notes_backend"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.7.1",
     "@dfinity/agent": "^0.15.6",
     "@dfinity/candid": "^0.15.6",
     "@dfinity/principal": "^0.15.6",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "framer-motion": "^10.12.17",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

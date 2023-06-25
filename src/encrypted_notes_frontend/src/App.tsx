@@ -1,5 +1,7 @@
-import { encrypted_notes_backend } from '../../declarations/encrypted_notes_backend';
 import { useState } from 'react';
+import { Button, Input, InputGroup } from '@chakra-ui/react';
+import { encrypted_notes_backend } from '../../declarations/encrypted_notes_backend';
+
 
 function App() {
   const [name, setName] = useState('');
@@ -21,13 +23,15 @@ function App() {
         </p>
       </div>
       <div style={{ margin: "30px" }}>
-        <input
-          id="name"
-          placeholder="Type text here"
-          value={name}
-          onChange={(ev) => setName(ev.target.value)}
-        ></input>
-        <button onClick={doGreet}>Get Greeting!</button>
+        <InputGroup>
+          <Input
+            id="name"
+            placeholder="Type text here"
+            value={name}
+            onChange={(ev) => setName(ev.target.value)}
+          />
+          <Button onClick={doGreet}>Get Greeting!</Button>
+        </InputGroup>
       </div>
       <div>
         Greeting is: "
