@@ -3,7 +3,7 @@ export const Notes = () => {
     <div>
       <h1>Notes</h1>
     </div>
-  )
-}
+  );
+};
 
-export default Notes
+export default Notes;
