@@ -33,10 +33,7 @@ const Navigation: FC = () => {
               };
             }}
           >
-            <Flex
-              align={'center'}
-              p={4}
-            >
+            <Flex align={'center'} p={4}>
               <Text fontSize={'2xl'}>{link.name}</Text>
             </Flex>
           </NavLink>

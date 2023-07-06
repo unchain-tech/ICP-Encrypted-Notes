@@ -10,14 +10,17 @@ const Header: FC = () => {
         borderBottom={'1px'}
         borderBottomColor={'gray.200'}
         px={4}
+        h={'64px'}
       >
-        <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
+        <Flex h={'64px'} alignItems={'center'} justifyContent={'space-between'}>
           <Box>
             <Icon as={FiBookOpen} boxSize={{ base: 8, lg: 12 }} />
           </Box>
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={7}>
-              <Button colorScheme={'green'} size={{ base: 'sm', lg: 'lg' }}>Internet Identity</Button>
+              <Button colorScheme={'green'} size={{ base: 'sm', lg: 'lg' }}>
+                Internet Identity
+              </Button>
             </Stack>
           </Flex>
         </Flex>
