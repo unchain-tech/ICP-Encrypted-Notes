@@ -1,8 +1,12 @@
+import Layout from '../../components/Layout';
+
 export const Devices = () => {
   return (
-    <div>
-      <h1>Devices</h1>
-    </div>
+    <Layout>
+      <div>
+        <h1>Devices</h1>
+      </div>
+    </Layout>
   );
 };
 

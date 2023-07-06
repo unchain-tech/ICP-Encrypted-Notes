@@ -1,8 +1,12 @@
+import Layout from '../../components/Layout';
+
 export const Notes = () => {
   return (
-    <div>
-      <h1>Notes</h1>
-    </div>
+    <Layout>
+      <div>
+        <h1>Notes</h1>
+      </div>
+    </Layout>
   );
 };
 
