@@ -1,14 +1,14 @@
 import { Box, HStack } from '@chakra-ui/react';
 import { FC } from 'react';
 
-import Header from './Header';
-import Navigation from './Navigation';
+import { Header } from './Header';
+import { Navigation } from './Navigation';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-const Layout: FC<LayoutProps> = ({ children }) => {
+export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <>
       <Header />
@@ -19,5 +19,3 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     </>
   );
 };
-
-export default Layout;

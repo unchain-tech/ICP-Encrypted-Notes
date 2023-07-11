@@ -2,7 +2,7 @@ import { Box, Flex, Icon } from '@chakra-ui/react';
 import { FC } from 'react';
 import { FiBookOpen } from 'react-icons/fi';
 
-const Header: FC = () => {
+export const Header: FC = () => {
   return (
     <>
       <Box
@@ -22,5 +22,3 @@ const Header: FC = () => {
     </>
   );
 };
-
-export default Header;

@@ -12,7 +12,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Devices', href: '/devices' },
 ];
 
-const Navigation: FC = () => {
+export const Navigation: FC = () => {
   return (
     <Box
       bg={'gray.100'}
@@ -42,5 +42,3 @@ const Navigation: FC = () => {
     </Box>
   );
 };
-
-export default Navigation;
