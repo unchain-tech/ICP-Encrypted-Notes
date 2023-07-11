@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Icon, Stack } from '@chakra-ui/react';
+import { Box, Flex, Icon } from '@chakra-ui/react';
 import { FC } from 'react';
 import { FiBookOpen } from 'react-icons/fi';
 
@@ -16,13 +16,7 @@ const Header: FC = () => {
           <Box>
             <Icon as={FiBookOpen} boxSize={{ base: 8, lg: 12 }} />
           </Box>
-          <Flex alignItems={'center'}>
-            <Stack direction={'row'} spacing={7}>
-              <Button colorScheme={'green'} size={{ base: 'sm', lg: 'lg' }}>
-                Internet Identity
-              </Button>
-            </Stack>
-          </Flex>
+          <Flex alignItems={'center'}></Flex>
         </Flex>
       </Box>
     </>

@@ -18,7 +18,7 @@ const Navigation: FC = () => {
       bg={'gray.100'}
       borderRight={'1px'}
       borderRightColor={'gray.200'}
-      minH={'100vh'}
+      minH={'calc(100vh - 64px)'}
       minW={'20vh'}
     >
       <Stack as={'nav'}>

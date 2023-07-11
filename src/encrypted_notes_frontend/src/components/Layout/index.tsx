@@ -12,9 +12,9 @@ const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <>
       <Header />
-      <HStack spacing={80} alignItems={'start'}>
+      <HStack alignItems={'start'}>
         <Navigation />
-        <Box>{children}</Box>
+        <Box flex={1}>{children}</Box>
       </HStack>
     </>
   );
