@@ -8,16 +8,18 @@ import {
 } from '@chakra-ui/react';
 import { FC, useRef } from 'react';
 
-interface DeleteNoteDialogProps {
+interface DeleteItemDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  handleDeleteNote: () => void;
+  title: string;
+  handleDeleteItem: () => void;
 }
 
-export const DeleteNoteDialog: FC<DeleteNoteDialogProps> = ({
+export const DeleteItemDialog: FC<DeleteItemDialogProps> = ({
   isOpen,
   onClose,
-  handleDeleteNote,
+  title,
+  handleDeleteItem,
 }) => {
   const cancelRef = useRef();
 
@@ -30,13 +32,13 @@ export const DeleteNoteDialog: FC<DeleteNoteDialogProps> = ({
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete Note
+            {title}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={handleDeleteNote} ml={3}>
+            <Button colorScheme="red" onClick={handleDeleteItem} ml={3}>
               Delete
             </Button>
           </AlertDialogFooter>
