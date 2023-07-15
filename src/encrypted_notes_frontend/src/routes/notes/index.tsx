@@ -2,7 +2,7 @@ import { Box, Button, Flex, SimpleGrid, useDisclosure } from '@chakra-ui/react';
 import { useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
 
-import { DeleteNoteDialog, Layout, NoteCard, NoteModal } from '../../components';
+import { DeleteItemDialog, Layout, NoteCard, NoteModal } from '../../components';
 
 export const Notes = () => {
   const {
@@ -83,16 +83,17 @@ export const Notes = () => {
       <NoteModal
         isOpen={isOpenNoteModal}
         onClose={onCloseNoteModal}
-        title={mode === 'add' ? 'Add note' : 'Edit note'}
+        title={mode === 'add' ? 'Add Note' : 'Edit Note'}
         currentNote={currentNote}
         setCurrentNote={setCurrentNote}
         handleSaveNote={mode === 'add' ? addNote : editNote}
       />
 
-      <DeleteNoteDialog
+      <DeleteItemDialog
         isOpen={isOpenDeleteDialog}
         onClose={onCloseDeleteDialog}
-        handleDeleteNote={deleteNote}
+        title={`Delete Note`}
+        handleDeleteItem={deleteNote}
       />
     </>
   );

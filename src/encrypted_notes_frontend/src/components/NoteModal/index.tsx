@@ -13,21 +13,21 @@ import {
 import { FC } from 'react';
 
 interface NoteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   currentNote: string;
+  isOpen: boolean;
   title: string;
   handleSaveNote: () => void;
+  onClose: () => void;
   setCurrentNote: (note: string) => void;
 }
 
 export const NoteModal: FC<NoteModalProps> = ({
-  isOpen,
-  onClose,
-  title,
   currentNote,
-  setCurrentNote,
+  isOpen,
+  title,
   handleSaveNote,
+  onClose,
+  setCurrentNote,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={'xl'}>

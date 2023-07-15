@@ -10,16 +10,16 @@ import { FC, useRef } from 'react';
 
 interface DeleteItemDialogProps {
   isOpen: boolean;
-  onClose: () => void;
   title: string;
   handleDeleteItem: () => void;
+  onClose: () => void;
 }
 
 export const DeleteItemDialog: FC<DeleteItemDialogProps> = ({
   isOpen,
-  onClose,
   title,
   handleDeleteItem,
+  onClose,
 }) => {
   const cancelRef = useRef();
 
