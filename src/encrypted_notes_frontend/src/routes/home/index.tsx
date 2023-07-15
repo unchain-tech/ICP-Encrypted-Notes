@@ -1,6 +1,14 @@
 import { Box, Button, Heading, Text } from '@chakra-ui/react';
+import { FC } from 'react';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 
-export const Home = () => {
+interface HomeProps {
+  handleLogin: (navigete: NavigateFunction) => void;
+}
+
+export const Home: FC<HomeProps> = ({ handleLogin }) => {
+  const navigate = useNavigate();
+
   return (
     <Box
       display={'flex'}
@@ -21,7 +29,11 @@ export const Home = () => {
       <Text fontSize={'xl'} mb={'2rem'}>
         Please authenticate with Internet Identity.
       </Text>
-      <Button colorScheme={'green'} size={{ base: 'sm', lg: 'lg' }}>
+      <Button
+        colorScheme={'green'}
+        size={{ base: 'sm', lg: 'lg' }}
+        onClick={() => handleLogin(navigate)}
+      >
         Authenticate
       </Button>
     </Box>
