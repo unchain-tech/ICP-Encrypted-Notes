@@ -1,3 +1,4 @@
+// Sample code
 service : {
-    "greet": (text) -> (text) query;
-}
+    "greet" : (text) -> (text) query;
+};
