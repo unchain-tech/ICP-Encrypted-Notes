@@ -20,6 +20,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
   "dependencies": {
     "@chakra-ui/react": "^2.7.1",
     "@dfinity/agent": "^0.15.6",
@@ -45,8 +48,10 @@
     "eslint": "^8.45.0",
     "events": "3.3.0",
     "html-webpack-plugin": "5.5.0",
+    "lint-staged": "^13.2.3",
     "prettier": "^2.8.8",
     "process": "0.11.10",
+    "simple-git-hooks": "^2.8.1",
     "stream-browserify": "3.0.0",
     "terser-webpack-plugin": "^5.3.3",
     "ts-loader": "^9.4.3",
