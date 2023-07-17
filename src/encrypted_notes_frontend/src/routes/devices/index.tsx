@@ -10,8 +10,9 @@ export const Devices = () => {
     onOpen: onOpenDeleteDialog,
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
-  const [devices, setDevices] =
-    useState<{ alias: string; isCurrentDevice: boolean }[]>([]);
+  const [devices, setDevices] = useState<
+    { alias: string; isCurrentDevice: boolean }[]
+  >([]);
 
   const deleteDevice = () => {
     console.log('delete device');

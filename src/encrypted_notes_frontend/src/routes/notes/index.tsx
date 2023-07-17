@@ -2,7 +2,12 @@ import { Box, Button, Flex, SimpleGrid, useDisclosure } from '@chakra-ui/react';
 import { useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
 
-import { DeleteItemDialog, Layout, NoteCard, NoteModal } from '../../components';
+import {
+  DeleteItemDialog,
+  Layout,
+  NoteCard,
+  NoteModal,
+} from '../../components';
 
 export const Notes = () => {
   const {
