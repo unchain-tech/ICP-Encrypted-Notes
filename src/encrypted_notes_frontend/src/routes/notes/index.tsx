@@ -31,18 +31,26 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
   } = useDisclosure();
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [notes, setNotes] = useState<EncryptedNote[]>([]);
-  const [currentNote, setCurrentNote] = useState('');
+  const [currentNote, setCurrentNote] = useState<EncryptedNote | undefined>(
+    undefined,
+  );
+  const [deleteId, setDeleteId] = useState<bigint | undefined>(undefined);
 
   const openAddNoteModal = () => {
     setMode('add');
-    setCurrentNote('');
+    setCurrentNote(undefined);
     onOpenNoteModal();
   };
 
-  const openEditNoteModal = (note: string) => {
+  const openEditNoteModal = (note: EncryptedNote) => {
     setMode('edit');
     setCurrentNote(note);
     onOpenNoteModal();
+  };
+
+  const openDeleteDialog = (id: bigint) => {
+    setDeleteId(id);
+    onOpenDeleteDialog();
   };
 
   const getNotes = async () => {
@@ -56,7 +64,7 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
 
   const addNote = async () => {
     try {
-      await actor.addNote(currentNote);
+      await actor.addNote(currentNote.encrypted_text);
     } catch (err) {
       console.error(err);
     } finally {
@@ -65,14 +73,28 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
     }
   };
 
-  const editNote = () => {
-    console.log('edit note');
-    onCloseNoteModal();
+  const editNote = async () => {
+    // console.log('edit note');
+    try {
+      await actor.updateNote(currentNote); // TOOD: updateをeditに統一する
+    } catch (err) {
+      console.error(err);
+    } finally {
+      onCloseNoteModal();
+      await getNotes();
+    }
   };
 
-  const deleteNote = () => {
-    console.log('delete note');
-    onCloseDeleteDialog();
+  const deleteNote = async () => {
+    // console.log(`deleteId: ${deleteId}`);
+    try {
+      await actor.deleteNote(deleteId);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      onCloseDeleteDialog();
+      await getNotes();
+    }
   };
 
   useEffect(() => {
@@ -104,8 +126,8 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
             {notes.map((note, index) => (
               <NoteCard
                 key={index}
-                note={note.encrypted_text}
-                handleOpenDeleteDialog={onOpenDeleteDialog}
+                note={note}
+                handleOpenDeleteDialog={openDeleteDialog}
                 handleOpenEditModal={openEditNoteModal}
               />
             ))}

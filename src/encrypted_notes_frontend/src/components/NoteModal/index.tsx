@@ -12,13 +12,15 @@ import {
 } from '@chakra-ui/react';
 import { FC } from 'react';
 
+import type { EncryptedNote } from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+
 interface NoteModalProps {
-  currentNote: string;
+  currentNote: EncryptedNote;
   isOpen: boolean;
   title: string;
   handleSaveNote: () => void;
   onClose: () => void;
-  setCurrentNote: (note: string) => void;
+  setCurrentNote: (note: EncryptedNote) => void;
 }
 
 export const NoteModal: FC<NoteModalProps> = ({
@@ -29,6 +31,8 @@ export const NoteModal: FC<NoteModalProps> = ({
   onClose,
   setCurrentNote,
 }) => {
+  const safeCurrentNote = currentNote || { id: BigInt(0), encrypted_text: '' };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
       <ModalOverlay />
@@ -39,8 +43,13 @@ export const NoteModal: FC<NoteModalProps> = ({
           <FormControl>
             <Textarea
               placeholder="Write your note here..."
-              value={currentNote}
-              onChange={(e) => setCurrentNote(e.target.value)}
+              value={safeCurrentNote.encrypted_text}
+              onChange={(e) =>
+                setCurrentNote({
+                  id: safeCurrentNote.id,
+                  encrypted_text: e.target.value,
+                })
+              }
             />
           </FormControl>
         </ModalBody>
