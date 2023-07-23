@@ -1,7 +1,12 @@
 import { Box, Button, Flex, SimpleGrid, useDisclosure } from '@chakra-ui/react';
-import { useState } from 'react';
+import type { ActorSubclass } from '@dfinity/agent';
+import { FC, useEffect, useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
 
+import type {
+  _SERVICE,
+  EncryptedNote,
+} from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import {
   DeleteItemDialog,
   Layout,
@@ -9,7 +14,11 @@ import {
   NoteModal,
 } from '../../components';
 
-export const Notes = () => {
+interface NotesProps {
+  actor: ActorSubclass<_SERVICE>;
+}
+
+export const Notes: FC<NotesProps> = ({ actor }) => {
   const {
     isOpen: isOpenNoteModal,
     onOpen: onOpenNoteModal,
@@ -21,7 +30,7 @@ export const Notes = () => {
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
   const [mode, setMode] = useState<'add' | 'edit'>('add');
-  const [notes, setNotes] = useState<string[]>([]);
+  const [notes, setNotes] = useState<EncryptedNote[]>([]);
   const [currentNote, setCurrentNote] = useState('');
 
   const openAddNoteModal = () => {
@@ -36,9 +45,24 @@ export const Notes = () => {
     onOpenNoteModal();
   };
 
-  const addNote = () => {
-    console.log('add note');
-    onCloseNoteModal();
+  const getNotes = async () => {
+    try {
+      const notes = await actor.getNotes();
+      setNotes(notes);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const addNote = async () => {
+    try {
+      await actor.addNote(currentNote);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      onCloseNoteModal();
+      await getNotes();
+    }
   };
 
   const editNote = () => {
@@ -50,6 +74,10 @@ export const Notes = () => {
     console.log('delete note');
     onCloseDeleteDialog();
   };
+
+  useEffect(() => {
+    getNotes();
+  }, []);
 
   return (
     <>
@@ -76,7 +104,7 @@ export const Notes = () => {
             {notes.map((note, index) => (
               <NoteCard
                 key={index}
-                note={note}
+                note={note.encrypted_text}
                 handleOpenDeleteDialog={onOpenDeleteDialog}
                 handleOpenEditModal={openEditNoteModal}
               />
