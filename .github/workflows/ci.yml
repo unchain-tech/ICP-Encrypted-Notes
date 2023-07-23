@@ -30,9 +30,9 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: clippy
-        run : npm run clippy
+        run: npm run clippy
       - name: rustfmt
-        run : npm run fmt
+        run: npm run fmt
       - name: lint
         run: npm run lint
       - name: format
