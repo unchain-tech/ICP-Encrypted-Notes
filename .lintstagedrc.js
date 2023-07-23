@@ -1,5 +1,9 @@
 const path = require('path');
 
+const buildFmtCommand = () => `cargo fmt`;
+
+const buildClippyCommand = () => `cargo clippy`;
+
 const buildLintCommand = (filenames) =>
   `eslint ${filenames.map((f) => path.relative(process.cwd(), f)).join(' ')}`;
 
@@ -9,6 +13,7 @@ const buildPrettierCommand = (filenames) =>
     .join(' ')} `;
 
 module.exports = {
+  '**/*.rs': [buildFmtCommand, buildClippyCommand],
   '**/*.{js,jsx,ts,tsx}': [buildLintCommand],
   '**/*.{js,jsx,ts,tsx,json,md}': [buildPrettierCommand],
 };
