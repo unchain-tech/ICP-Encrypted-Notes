@@ -1,4 +1,7 @@
+import { HttpAgent } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
+// import type { Principal } from '@dfinity/principal';
 import { useState } from 'react';
 import {
   BrowserRouter,
@@ -7,10 +10,17 @@ import {
   Routes,
 } from 'react-router-dom';
 
+import {
+  canisterId,
+  createActor,
+} from '../../declarations/encrypted_notes_backend';
+import type { _SERVICE } from '../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import { Devices, Home, Notes } from './routes';
 
 function App() {
-  const [principal, setPrincipal] = useState(undefined);
+  // TODO: principalが不要であれば削除する
+  // const [principal, setPrincipal] = useState<Principal>(undefined);
+  const [actor, setActor] = useState<ActorSubclass<_SERVICE>>(undefined);
 
   const handleSuccess = (
     authClient: AuthClient,
@@ -21,8 +31,18 @@ function App() {
     // 認証したユーザーの`principal`を取得します。
     const principal = identity.getPrincipal();
     console.log(`User principal: ${principal.toString()}`);
+    // 取得した`identity`を使用して、ICと対話する`agent`を作成します。
+    const newAgent = new HttpAgent({ identity });
+    if (process.env.DFX_NETWORK === 'local') {
+      newAgent.fetchRootKey();
+    }
+    // 認証したユーザーの情報で`actor`を作成します。
+    const options = { agent: newAgent };
+    const actor = createActor(canisterId, options);
 
-    setPrincipal(principal);
+    // TODO:コンポーネントに渡すデータが複数ある場合、type Userとしてひとまとめにする
+    // setPrincipal(principal);
+    setActor(actor);
 
     // ノート一覧ページへリダイレクトします。
     navigate('/notes');
@@ -59,7 +79,7 @@ function App() {
           path={'/'}
           element={<Home handleAuthentication={authenticate} />}
         />
-        <Route path={'/notes'} element={<Notes />} />
+        <Route path={'/notes'} element={<Notes actor={actor} />} />
         <Route path={'/devices'} element={<Devices />} />
       </Routes>
     </BrowserRouter>
