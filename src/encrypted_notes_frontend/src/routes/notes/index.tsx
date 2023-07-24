@@ -74,7 +74,6 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
   };
 
   const updateNote = async () => {
-    // console.log('edit note');
     try {
       await actor.updateNote(currentNote);
     } catch (err) {
@@ -86,7 +85,6 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
   };
 
   const deleteNote = async () => {
-    // console.log(`deleteId: ${deleteId}`);
     try {
       await actor.deleteNote(deleteId);
     } catch (err) {
