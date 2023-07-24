@@ -73,10 +73,10 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
     }
   };
 
-  const editNote = async () => {
+  const updateNote = async () => {
     // console.log('edit note');
     try {
-      await actor.updateNote(currentNote); // TOOD: updateをeditに統一する
+      await actor.updateNote(currentNote);
     } catch (err) {
       console.error(err);
     } finally {
@@ -141,7 +141,7 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
         title={mode === 'add' ? 'Add Note' : 'Edit Note'}
         currentNote={currentNote}
         setCurrentNote={setCurrentNote}
-        handleSaveNote={mode === 'add' ? addNote : editNote}
+        handleSaveNote={mode === 'add' ? addNote : updateNote}
       />
 
       <DeleteItemDialog
