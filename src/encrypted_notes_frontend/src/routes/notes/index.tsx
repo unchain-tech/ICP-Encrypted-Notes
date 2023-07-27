@@ -1,7 +1,9 @@
 import { Box, Button, Flex, SimpleGrid, useDisclosure } from '@chakra-ui/react';
 import type { ActorSubclass } from '@dfinity/agent';
+import { AuthClient } from '@dfinity/auth-client';
 import { FC, useEffect, useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 
 import type {
   _SERVICE,
@@ -13,12 +15,23 @@ import {
   NoteCard,
   NoteModal,
 } from '../../components';
+import { useDeviceCheck } from '../../hooks';
+import { CryptoService } from '../../lib/cryptoService';
 
 interface NotesProps {
   actor: ActorSubclass<_SERVICE>;
+  client: AuthClient;
+  cryptoService: CryptoService;
+  checkAuthenticated: (navigate: NavigateFunction) => Promise<void>;
 }
 
-export const Notes: FC<NotesProps> = ({ actor }) => {
+export const Notes: FC<NotesProps> = ({
+  actor,
+  client,
+  cryptoService,
+  checkAuthenticated,
+}) => {
+  const navigate = useNavigate();
   const {
     isOpen: isOpenNoteModal,
     onOpen: onOpenNoteModal,
@@ -35,6 +48,8 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
     undefined,
   );
   const [deleteId, setDeleteId] = useState<bigint | undefined>(undefined);
+
+  useDeviceCheck(actor, client, cryptoService);
 
   const openAddNoteModal = () => {
     setMode('add');
@@ -96,8 +111,16 @@ export const Notes: FC<NotesProps> = ({ actor }) => {
   };
 
   useEffect(() => {
-    getNotes();
+    checkAuthenticated(navigate);
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (actor) {
+        await getNotes();
+      }
+    })();
+  }, [actor]);
 
   return (
     <>

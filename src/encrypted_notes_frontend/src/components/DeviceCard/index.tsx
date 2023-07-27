@@ -3,12 +3,14 @@ import { FC } from 'react';
 import { FiTrash2 } from 'react-icons/fi';
 
 interface DeviceCardProps {
-  device: { alias: string; isCurrentDevice: boolean };
-  handleOpenDeleteDialog: () => void;
+  deviceAlias: string;
+  isCurrentDevice: boolean;
+  handleOpenDeleteDialog: (alias: string) => void;
 }
 
 export const DeviceCard: FC<DeviceCardProps> = ({
-  device,
+  deviceAlias,
+  isCurrentDevice,
   handleOpenDeleteDialog,
 }) => {
   return (
@@ -19,10 +21,10 @@ export const DeviceCard: FC<DeviceCardProps> = ({
       display={'inline-flex'}
     >
       <CardBody>
-        <Text fontSize={{ base: 'sm', lg: 'xl' }}>{device.alias}</Text>
+        <Text fontSize={{ base: 'sm', lg: 'xl' }}>{deviceAlias}</Text>
       </CardBody>
       <CardFooter>
-        {device.isCurrentDevice ? (
+        {isCurrentDevice ? (
           <Text as={'b'} color={'gray'} fontSize={{ base: 'sm', lg: 'xl' }}>
             This Device
           </Text>
@@ -30,7 +32,7 @@ export const DeviceCard: FC<DeviceCardProps> = ({
           <IconButton
             aria-label={'Delete device'}
             icon={<FiTrash2 />}
-            onClick={handleOpenDeleteDialog}
+            onClick={() => handleOpenDeleteDialog(deviceAlias)}
           />
         )}
       </CardFooter>

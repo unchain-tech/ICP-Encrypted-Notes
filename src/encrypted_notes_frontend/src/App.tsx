@@ -15,37 +15,49 @@ import {
   createActor,
 } from '../../declarations/encrypted_notes_backend';
 import type { _SERVICE } from '../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+import { CryptoService } from './lib/cryptoService';
 import { Devices, Home, Notes } from './routes';
 
 function App() {
   // TODO: principalが不要であれば削除する
   // const [principal, setPrincipal] = useState<Principal>(undefined);
   const [actor, setActor] = useState<ActorSubclass<_SERVICE>>(undefined);
+  const [client, setClient] = useState<AuthClient>(undefined);
+  const [cryptoService, setCryptoService] = useState<CryptoService>(undefined);
 
-  const handleSuccess = (
+  const handleSuccess = async (
     authClient: AuthClient,
     navigate: NavigateFunction,
   ) => {
-    // 認証したユーザーの`identity`を取得します。
-    const identity = authClient.getIdentity();
-    // 認証したユーザーの`principal`を取得します。
-    const principal = identity.getPrincipal();
-    console.log(`User principal: ${principal.toString()}`);
-    // 取得した`identity`を使用して、ICと対話する`agent`を作成します。
-    const newAgent = new HttpAgent({ identity });
-    if (process.env.DFX_NETWORK === 'local') {
-      newAgent.fetchRootKey();
+    try {
+      // 認証したユーザーの`identity`を取得します。
+      const identity = authClient.getIdentity();
+      // 認証したユーザーの`principal`を取得します。
+      const principal = identity.getPrincipal();
+      console.log(`User principal: ${principal.toString()}`);
+      // 取得した`identity`を使用して、ICと対話する`agent`を作成します。
+      const newAgent = new HttpAgent({ identity });
+      if (process.env.DFX_NETWORK === 'local') {
+        newAgent.fetchRootKey();
+      }
+      // 認証したユーザーの情報で`actor`を作成します。
+      const options = { agent: newAgent };
+      const actor = createActor(canisterId, options);
+
+      const cryptoService = new CryptoService(actor);
+      await cryptoService.init();
+
+      // TODO:コンポーネントに渡すデータが複数ある場合、type Userとしてひとまとめにする
+      // setPrincipal(principal);
+      setActor(actor);
+      setClient(authClient);
+      setCryptoService(cryptoService);
+
+      navigate('/notes');
+    } catch (err) {
+      console.error(`Authentication Failed: , ${err}`);
+      // TODO: 認証失敗の通知を出す
     }
-    // 認証したユーザーの情報で`actor`を作成します。
-    const options = { agent: newAgent };
-    const actor = createActor(canisterId, options);
-
-    // TODO:コンポーネントに渡すデータが複数ある場合、type Userとしてひとまとめにする
-    // setPrincipal(principal);
-    setActor(actor);
-
-    // ノート一覧ページへリダイレクトします。
-    navigate('/notes');
   };
 
   const authenticate = async (navigate: NavigateFunction) => {
@@ -72,6 +84,34 @@ function App() {
     });
   };
 
+  const checkAuthenticated = async (navigate: NavigateFunction) => {
+    try {
+      const authClient = await AuthClient.create();
+      const isAuthenticated = await authClient.isAuthenticated();
+      if (!isAuthenticated) {
+        navigate('/');
+        return;
+      }
+
+      const identity = authClient.getIdentity();
+      const newAgent = new HttpAgent({ identity });
+      if (process.env.DFX_NETWORK === 'local') {
+        newAgent.fetchRootKey();
+      }
+      const options = { agent: newAgent };
+      const actor = createActor(canisterId, options);
+
+      const cryptoService = new CryptoService(actor);
+      await cryptoService.init();
+
+      setActor(actor);
+      setClient(authClient);
+      setCryptoService(cryptoService);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -79,8 +119,28 @@ function App() {
           path={'/'}
           element={<Home handleAuthentication={authenticate} />}
         />
-        <Route path={'/notes'} element={<Notes actor={actor} />} />
-        <Route path={'/devices'} element={<Devices />} />
+        <Route
+          path={'/notes'}
+          element={
+            <Notes
+              actor={actor}
+              client={client}
+              cryptoService={cryptoService}
+              checkAuthenticated={checkAuthenticated}
+            />
+          }
+        />
+        <Route
+          path={'/devices'}
+          element={
+            <Devices
+              actor={actor}
+              client={client}
+              cryptoService={cryptoService}
+              checkAuthenticated={checkAuthenticated}
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

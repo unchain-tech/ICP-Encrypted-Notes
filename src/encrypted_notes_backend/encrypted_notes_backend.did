@@ -1,9 +1,20 @@
+type DeviceAlias = text;
+type PublicKey = text;
+
 type EncryptedNote = record {
   "id" : nat;
   "encrypted_text" : text;
-}
+};
+
+type RegisterDeviceResult = variant {
+  Ok;
+  Err : text;
+};
 
 service : {
+  "getDeviceAliases" : () -> (vec DeviceAlias) query;
+  "registerDevice" : (DeviceAlias, PublicKey) -> (RegisterDeviceResult);
+  "deleteDevice" : (DeviceAlias) -> ();
   "getNotes" : () -> (vec EncryptedNote) query;
   "addNote" : (text) -> ();
   "deleteNote" : (nat) -> ();
