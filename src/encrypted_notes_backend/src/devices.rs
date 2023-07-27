@@ -61,7 +61,7 @@ impl Devices {
             .unwrap_or_default()
     }
 
-    pub fn unregister_device(&mut self, caller: Principal, alias: DeviceAlias) {
+    pub fn delete_device(&mut self, caller: Principal, alias: DeviceAlias) {
         if let Some(device_data) = self.devices.get_mut(&caller) {
             // Principalは、必ず1つ以上のデバイスエイリアスが紐づいているものとします。
             assert!(device_data.aliases.len() > 1);

@@ -47,13 +47,13 @@ fn get_device_aliases() -> Vec<DeviceAlias> {
     DEVICES.with(|devices| devices.borrow().get_device_aliases(caller))
 }
 
-#[update(name = "unregisterDevice")]
-fn unregister_device(alias: DeviceAlias) {
+#[update(name = "deleteDevice")]
+fn delete_device(alias: DeviceAlias) {
     let caller = caller();
     assert!(is_caller_registered(caller));
 
     DEVICES.with(|devices| {
-        devices.borrow_mut().unregister_device(caller, alias);
+        devices.borrow_mut().delete_device(caller, alias);
     })
 }
 

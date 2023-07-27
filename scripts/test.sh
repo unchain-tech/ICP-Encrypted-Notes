@@ -52,7 +52,7 @@ RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return device list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 
-FUNCTION='unregisterDevice'
+FUNCTION='deleteDevice'
 # 別のデバイスを登録する
 UNUSED_RESULR=`dfx canister call encrypted_notes_backend registerDevice '('\"$TEST_DEVICE_ALIAS_02\"', '\"$TEST_PUBLIC_KEY_02\"')'`
 echo "===== $FUNCTION ====="
