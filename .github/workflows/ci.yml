@@ -47,6 +47,8 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install WebAssembly target
+        run: rustup target add wasm32-unknown-unknown
       - name: Install IC SDK
         run: DFX_VERSION=0.14.1 sh -ci "$(curl -sSL https://internetcomputer.org/install.sh)"
       - name: unit test
