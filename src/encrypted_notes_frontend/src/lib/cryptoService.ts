@@ -1,10 +1,7 @@
 import { ActorSubclass } from '@dfinity/agent';
 import { v4 as uuidV4 } from 'uuid';
 
-import {
-  _SERVICE,
-  RegisterDeviceResult,
-} from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+import { _SERVICE } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 
 export class CryptoService {
   private actor: ActorSubclass<_SERVICE>;
@@ -29,16 +26,7 @@ export class CryptoService {
   public async init(): Promise<void> {
     /** STEP2: デバイスデータの登録*/
     // バックエンドキャニスターにデバイスエイリアスを登録します。
-    const result: RegisterDeviceResult = await this.actor.registerDevice(
-      this.deviceAlias,
-      'dummyPublicKey',
-    );
-    if ('Ok' in result) {
-      console.log(`registerDevice result: ${result}`); // TODO: delete
-    }
-    if ('Err' in result) {
-      console.error(`registerDevice error: ${result.Err}`); // TODO: delete
-    }
+    await this.actor.registerDevice(this.deviceAlias, 'dummyPublicKey');
   }
 
   /** STEP3: デバイスデータの削除 */

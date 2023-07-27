@@ -8,8 +8,6 @@ pub type DeviceAlias = String;
 pub type PublicKey = String;
 pub type EncryptedSymmetricKey = String;
 
-pub type RegisterDeviceResult = Result<(), String>;
-
 #[derive(CandidType, Clone, Serialize, Deserialize)]
 pub struct DeviceData {
     pub aliases: HashMap<DeviceAlias, PublicKey>,
@@ -27,16 +25,15 @@ impl Devices {
         caller: Principal,
         alias: DeviceAlias,
         public_key: PublicKey,
-    ) -> RegisterDeviceResult {
+    ) {
         match self.devices.entry(caller) {
             // 既にPrincipalが登録されている場合は、デバイスデータを追加します。
             Entry::Occupied(mut device_data_entry) => {
                 let device_data = device_data_entry.get_mut();
                 match device_data.aliases.entry(alias) {
-                    Entry::Occupied(_) => Err("Device alias is already registered".to_string()),
+                    Entry::Occupied(_) => {}
                     Entry::Vacant(alias_entry) => {
                         alias_entry.insert(public_key);
-                        Ok(())
                     }
                 }
             }
@@ -49,7 +46,6 @@ impl Devices {
                 // デバイスエイリアスと公開鍵を紐づけて保存します。
                 device_data.aliases.insert(alias, public_key);
                 empty_device_data_entry.insert(device_data);
-                Ok(())
             }
         }
     }

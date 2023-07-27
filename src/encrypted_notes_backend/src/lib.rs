@@ -29,7 +29,7 @@ fn is_caller_registered(caller: Principal) -> bool {
 }
 
 #[update(name = "registerDevice")]
-fn register_device(alias: DeviceAlias, public_key: PublicKey) -> RegisterDeviceResult {
+fn register_device(alias: DeviceAlias, public_key: PublicKey) {
     let caller = caller();
 
     DEVICES.with(|devices| {

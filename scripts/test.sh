@@ -36,14 +36,9 @@ dfx deploy encrypted_notes_backend
 # ===== テスト =====
 FUNCTION='registerDevice'
 echo "===== $FUNCTION ====="
-EXPECT='(variant { Ok })'
+EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_DEVICE_ALIAS_01\"', '\"$TEST_PUBLIC_KEY_01\"')'`
-compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
-
-EXPECT='(variant { Err = "Device alias is already registered" })'
-RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_DEVICE_ALIAS_01\"', '\"$TEST_PUBLIC_KEY_01\"')'`
-compare_result "Error duplicate device alias" "$EXPECT" "$RESULT" || TEST_STATUS=1
-
+compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getDeviceAliases'
 echo "===== $FUNCTION ====="
