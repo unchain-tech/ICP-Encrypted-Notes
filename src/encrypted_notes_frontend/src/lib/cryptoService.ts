@@ -1,13 +1,17 @@
 import { ActorSubclass } from '@dfinity/agent';
 import { v4 as uuidV4 } from 'uuid';
 
-import { _SERVICE } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+import {
+  _SERVICE,
+  RegisterKeyResult,
+} from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import { loadKey, storeKey } from './keyStorage';
 
 export class CryptoService {
   private actor: ActorSubclass<_SERVICE>;
   private publicKey: CryptoKey | null;
   private privateKey: CryptoKey | null;
+  private symmetricKey: CryptoKey | null;
   public readonly deviceAlias: string;
 
   /** STEP1: コンストラクタを定義する */
@@ -56,6 +60,34 @@ export class CryptoService {
     await this.actor.registerDevice(this.deviceAlias, exportedPublicKeyBase64);
 
     /** STEP5: 対称鍵を取得する */
+    const isSymKeyRegistered =
+      await this.actor.isEncryptedSymmetricKeyRegistered();
+    if (!isSymKeyRegistered) {
+      console.log('Generate symmetric key...');
+      // 対称鍵を生成します。
+      this.symmetricKey = await this.generateSymmetricKey();
+      // 対称鍵を公開鍵で暗号化します。
+      const wrappedSymmetricKey: ArrayBuffer = await this.wrapSymmetricKey(
+        this.symmetricKey,
+        this.publicKey,
+      );
+      const wrappedSymmetricKeyBase64: string =
+        this.arrayBufferToBase64(wrappedSymmetricKey);
+      // 暗号化した対称鍵をバックエンドキャニスターに登録します。
+      const result: RegisterKeyResult =
+        await this.actor.registerEncryptedSymmetricKey(
+          exportedPublicKeyBase64,
+          wrappedSymmetricKeyBase64,
+        );
+      if ('Err' in result) {
+        throw new Error(result.Err);
+      }
+      // TODO: 対称鍵の同期処理を実装する
+      console.log('Synchronizing symmetric keys...');
+    } else {
+      console.log('Get symmetric key...');
+      // TODO: 対称鍵の取得処理を実装する
+    }
   }
 
   /** STEP3: デバイスデータの削除 */
@@ -77,9 +109,40 @@ export class CryptoService {
         hash: 'SHA-256',
       },
       true,
-      ['encrypt', 'decrypt'],
+      ['encrypt', 'decrypt', 'wrapKey', 'unwrapKey'],
     );
     return keyPair;
+  }
+
+  private async generateSymmetricKey(): Promise<CryptoKey> {
+    const symmetricKey = await window.crypto.subtle.generateKey(
+      {
+        // キー生成のアルゴリズム
+        name: 'AES-GCM',
+        // キー長
+        length: 256,
+      },
+      // キーを抽出可能（バイト配列としてエクスポートできること）とする
+      true,
+      // キーがサポートする使用法
+      ['encrypt', 'decrypt'],
+    );
+    return symmetricKey;
+  }
+
+  private async wrapSymmetricKey(
+    symmetricKey: CryptoKey,
+    wrappingKey: CryptoKey,
+  ): Promise<ArrayBuffer> {
+    const wrappedSymmetricKey = await window.crypto.subtle.wrapKey(
+      'raw',
+      symmetricKey,
+      wrappingKey,
+      {
+        name: 'RSA-OAEP',
+      },
+    );
+    return wrappedSymmetricKey;
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
