@@ -7,16 +7,30 @@ type EncryptedNote = record {
   "encrypted_text" : text;
 };
 
+type DeviceError = variant {
+  AlreadyRegistered;
+  DeviceNotRegistered;
+  KeyNotSynchronized;
+  UnknownPublicKey;
+};
+
 type RegisterKeyResult = variant {
   Ok;
   Err : text;
-}
+};
+
+type SynchronizeKeyResult = variant {
+  Ok : EncryptedSymmetricKey;
+  Err : DeviceError;
+};
 
 service : {
   "getDeviceAliases" : () -> (vec DeviceAlias) query;
+  "getEncryptedSymmetricKey" : (PublicKey) -> (SynchronizeKeyResult) query;
   "isEncryptedSymmetricKeyRegistered" : () -> (bool) query;
   "registerDevice" : (DeviceAlias, PublicKey) -> ();
   "registerEncryptedSymmetricKey" : (PublicKey, EncryptedSymmetricKey) -> (RegisterKeyResult);
+  "uploadEncryptedSymmetricKeys" : (vec record { PublicKey; EncryptedSymmetricKey }) -> (RegisterKeyResult);
   "deleteDevice" : (DeviceAlias) -> ();
   "getNotes" : () -> (vec EncryptedNote) query;
   "addNote" : (text) -> ();

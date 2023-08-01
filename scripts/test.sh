@@ -70,9 +70,29 @@ EXPECT='(variant { Err = "Already registered" })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
 compare_result "Check with $FUNCTION Already registered" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
-FUNCTION='deleteDevice'
-# 別のデバイスを登録する
+# 鍵の同期処理
+## 別のデバイスを登録する
 UNUSED_RESULR=`dfx canister call encrypted_notes_backend registerDevice '('\"$TEST_DEVICE_ALIAS_02\"', '\"$TEST_PUBLIC_KEY_02\"')'`
+
+FUNCTION='getUnsyncedPublicKeys'
+echo "===== $FUNCTION ====="
+EXPECT='(vec { '\"$TEST_PUBLIC_KEY_02\"' })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
+compare_result "Return unsynced public key list" "$EXPECT" "$RESULT" || TEST_STATUS=1
+
+FUNCTION='uploadEncryptedSymmetricKeys'
+echo "===== $FUNCTION ====="
+EXPECT='(variant { Ok })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '(vec { record { '\"$TEST_PUBLIC_KEY_02\"'; '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_02\"' } })'`
+compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
+
+FUNCTION='getEncryptedSymmetricKey'
+echo "===== $FUNCTION ====="
+EXPECT='(variant { Ok = '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_02\"' })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_02\"')'`
+compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
+
+FUNCTION='deleteDevice'
 echo "===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_DEVICE_ALIAS_01\"')'`
