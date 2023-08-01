@@ -1,14 +1,22 @@
 type DeviceAlias = text;
 type PublicKey = text;
+type EncryptedSymmetricKey = text;
 
 type EncryptedNote = record {
   "id" : nat;
   "encrypted_text" : text;
 };
 
+type RegisterKeyResult = variant {
+  Ok;
+  Err : text;
+}
+
 service : {
   "getDeviceAliases" : () -> (vec DeviceAlias) query;
+  "isEncryptedSymmetricKeyRegistered" : () -> (bool) query;
   "registerDevice" : (DeviceAlias, PublicKey) -> ();
+  "registerEncryptedSymmetricKey" : (PublicKey, EncryptedSymmetricKey) -> (RegisterKeyResult);
   "deleteDevice" : (DeviceAlias) -> ();
   "getNotes" : () -> (vec EncryptedNote) query;
   "addNote" : (text) -> ();

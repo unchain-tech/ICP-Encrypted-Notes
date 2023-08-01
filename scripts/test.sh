@@ -20,6 +20,8 @@ TEST_DEVICE_ALIAS_01='TEST_DEVICE_ALIAS_01'
 TEST_DEVICE_ALIAS_02='TEST_DEVICE_ALIAS_02'
 TEST_PUBLIC_KEY_01='TEST_PUBLIC_KEY_01'
 TEST_PUBLIC_KEY_02='TEST_PUBLIC_KEY_02'
+TEST_ENCRYPTED_SYMMETRIC_KEY_01='TEST_ENCRYPTED_SYMMETRIC_KEY_01'
+TEST_ENCRYPTED_SYMMETRIC_KEY_02='TEST_ENCRYPTED_SYMMETRIC_KEY_02'
 
 # ===== 準備 =====
 dfx stop
@@ -46,6 +48,27 @@ EXPECT='(vec { '\"$TEST_DEVICE_ALIAS_01\"' })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return device list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
+FUNCTION='isEncryptedSymmetricKeyRegistered'
+echo "===== $FUNCTION ====="
+EXPECT='(false)'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
+compare_result "Return false" "$EXPECT" "$RESULT" || TEST_STATUS=1
+
+FUNCTION='registerEncryptedSymmetricKey'
+echo "===== $FUNCTION ====="
+EXPECT='(variant { Ok })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
+compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
+# 確認
+FUNCTION='isEncryptedSymmetricKeyRegistered'
+EXPECT='(true)'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
+compare_result "Check with $FUNCTION" "$EXPECT" "$RESULT" || TEST_STATUS=1
+# 確認
+FUNCTION='registerEncryptedSymmetricKey'
+EXPECT='(variant { Err = "Already registered" })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
+compare_result "Check with $FUNCTION Already registered" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='deleteDevice'
 # 別のデバイスを登録する

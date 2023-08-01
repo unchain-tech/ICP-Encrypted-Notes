@@ -57,6 +57,34 @@ fn delete_device(alias: DeviceAlias) {
     })
 }
 
+#[query(name = "isEncryptedSymmetricKeyRegistered")]
+fn is_encrypted_symmetric_key_registered() -> bool {
+    let caller = caller();
+    assert!(is_caller_registered(caller));
+
+    DEVICES.with(|devices| {
+        devices
+            .borrow()
+            .is_encrypted_symmetric_key_registered(caller)
+    })
+}
+
+#[update(name = "registerEncryptedSymmetricKey")]
+fn register_encrypted_symmetric_key(
+    public_key: PublicKey,
+    encrypted_symmetric_key: EncryptedSymmetricKey,
+) -> RegisterKeyResult {
+    let caller = caller();
+    assert!(is_caller_registered(caller));
+
+    DEVICES.with(|devices| {
+        devices.borrow_mut().register_encrypted_symmetric_key(
+            caller,
+            public_key,
+            encrypted_symmetric_key,
+        )
+    })
+}
 #[query(name = "getNotes")]
 fn get_notes() -> Vec<EncryptedNote> {
     let caller = caller();

@@ -7,6 +7,7 @@ use std::collections::HashMap;
 pub type DeviceAlias = String;
 pub type PublicKey = String;
 pub type EncryptedSymmetricKey = String;
+pub type RegisterKeyResult = Result<(), String>;
 
 #[derive(CandidType, Clone, Serialize, Deserialize)]
 pub struct DeviceData {
@@ -67,5 +68,36 @@ impl Devices {
                 device_data.keys.remove(&public_key);
             }
         }
+    }
+
+    pub fn is_encrypted_symmetric_key_registered(&self, caller: Principal) -> bool {
+        self.devices
+            .get(&caller)
+            .map_or(false, |device_data| !device_data.keys.is_empty())
+    }
+
+    pub fn register_encrypted_symmetric_key(
+        &mut self,
+        caller: Principal,
+        public_key: PublicKey,
+        encrypted_symmetric_key: EncryptedSymmetricKey,
+    ) -> RegisterKeyResult {
+        match self.devices.get_mut(&caller) {
+            Some(device_data) => {
+                if !Self::is_registered_public_key(device_data, &public_key) {
+                    return Err("Unknown public key".to_string());
+                }
+                if !device_data.keys.is_empty() {
+                    return Err("Already registered".to_string());
+                }
+                device_data.keys.insert(public_key, encrypted_symmetric_key);
+                Ok(())
+            }
+            None => Err("Device not registered".to_string()),
+        }
+    }
+
+    fn is_registered_public_key(device_data: &DeviceData, public_key: &PublicKey) -> bool {
+        device_data.aliases.values().any(|key| key == public_key)
     }
 }
