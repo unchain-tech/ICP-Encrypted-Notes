@@ -80,9 +80,16 @@ export class CryptoService {
           wrappedSymmetricKeyBase64,
         );
       if ('Err' in result) {
-        throw new Error(result.Err);
+        if ('UnknownPublicKey' in result.Err) {
+          throw new Error('Unknown public key');
+        }
+        if ('AlreadyRegistered' in result.Err) {
+          throw new Error('Already registered');
+        }
+        if ('DeviceNotRegistered' in result.Err) {
+          throw new Error('Device not registered');
+        }
       }
-      // TODO: 対称鍵の同期処理を実装する
       console.log('Synchronizing symmetric keys...');
     } else {
       console.log('Get symmetric key...');

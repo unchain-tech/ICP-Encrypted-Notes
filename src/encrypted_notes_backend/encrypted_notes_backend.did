@@ -16,7 +16,7 @@ type DeviceError = variant {
 
 type RegisterKeyResult = variant {
   Ok;
-  Err : text;
+  Err : DeviceError;
 };
 
 type SynchronizeKeyResult = variant {

@@ -15,7 +15,7 @@ pub enum DeviceError {
 pub type DeviceAlias = String;
 pub type PublicKey = String;
 pub type EncryptedSymmetricKey = String;
-pub type RegisterKeyResult = Result<(), String>;
+pub type RegisterKeyResult = Result<(), DeviceError>;
 pub type SynchronizeKeyResult = Result<EncryptedSymmetricKey, DeviceError>;
 
 #[derive(CandidType, Clone, Serialize, Deserialize)]
@@ -125,15 +125,15 @@ impl Devices {
         match self.devices.get_mut(&caller) {
             Some(device_data) => {
                 if !Self::is_registered_public_key(device_data, &public_key) {
-                    return Err("Unknown public key".to_string());
+                    return Err(DeviceError::UnknownPublicKey);
                 }
                 if !device_data.keys.is_empty() {
-                    return Err("Already registered".to_string());
+                    return Err(DeviceError::AlreadyRegistered);
                 }
                 device_data.keys.insert(public_key, encrypted_symmetric_key);
                 Ok(())
             }
-            None => Err("Device not registered".to_string()),
+            None => Err(DeviceError::DeviceNotRegistered),
         }
     }
 
@@ -146,13 +146,13 @@ impl Devices {
             Some(device_data) => {
                 for (public_key, encrypted_symmetric_key) in keys {
                     if !Self::is_registered_public_key(device_data, &public_key) {
-                        return Err("Unknown public key".to_string());
+                        return Err(DeviceError::UnknownPublicKey);
                     }
                     device_data.keys.insert(public_key, encrypted_symmetric_key);
                 }
                 Ok(())
             }
-            None => Err("Device not registered".to_string()),
+            None => Err(DeviceError::DeviceNotRegistered),
         }
     }
 

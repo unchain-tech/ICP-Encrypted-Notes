@@ -37,63 +37,68 @@ dfx deploy encrypted_notes_backend
 
 # ===== テスト =====
 FUNCTION='registerDevice'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_DEVICE_ALIAS_01\"', '\"$TEST_PUBLIC_KEY_01\"')'`
 compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getDeviceAliases'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(vec { '\"$TEST_DEVICE_ALIAS_01\"' })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return device list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='isEncryptedSymmetricKeyRegistered'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(false)'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return false" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='registerEncryptedSymmetricKey'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(variant { Ok })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
 compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
+# 確認
+FUNCTION='registerEncryptedSymmetricKey'
+EXPECT='(variant { Err = variant { AlreadyRegistered } })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
+compare_result "Return Err(AlreadyRegistered)" "$EXPECT" "$RESULT" || TEST_STATUS=1
 # 確認
 FUNCTION='isEncryptedSymmetricKeyRegistered'
 EXPECT='(true)'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Check with $FUNCTION" "$EXPECT" "$RESULT" || TEST_STATUS=1
-# 確認
-FUNCTION='registerEncryptedSymmetricKey'
-EXPECT='(variant { Err = "Already registered" })'
-RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_01\"', '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_01\"')'`
-compare_result "Check with $FUNCTION Already registered" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 # 鍵の同期処理
 ## 別のデバイスを登録する
+echo -e "\n===== Register other device & check unsynced ====="
 UNUSED_RESULR=`dfx canister call encrypted_notes_backend registerDevice '('\"$TEST_DEVICE_ALIAS_02\"', '\"$TEST_PUBLIC_KEY_02\"')'`
+FUNCTION='getEncryptedSymmetricKey'
+EXPECT='(variant { Err = variant { KeyNotSynchronized } })'
+RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_02\"')'`
+compare_result "Return Err(KeyNotSynchronized)" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getUnsyncedPublicKeys'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(vec { '\"$TEST_PUBLIC_KEY_02\"' })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return unsynced public key list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='uploadEncryptedSymmetricKeys'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(variant { Ok })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '(vec { record { '\"$TEST_PUBLIC_KEY_02\"'; '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_02\"' } })'`
 compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getEncryptedSymmetricKey'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(variant { Ok = '\"$TEST_ENCRYPTED_SYMMETRIC_KEY_02\"' })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_PUBLIC_KEY_02\"')'`
 compare_result "Return Ok" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='deleteDevice'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '('\"$TEST_DEVICE_ALIAS_01\"')'`
 compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
@@ -104,19 +109,19 @@ RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Check with $FUNCTION" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='addNote'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '("First text!")'`
 compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getNotes'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='(vec { record { id = 0 : nat; encrypted_text = "First text!" } })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return note list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='updateNote'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '(
   record {
@@ -132,7 +137,7 @@ RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Check with $FUNCTION" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='deleteNote'
-echo "===== $FUNCTION ====="
+echo -e "\n===== $FUNCTION ====="
 EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '(0)'`
 compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
