@@ -27,6 +27,7 @@ type SynchronizeKeyResult = variant {
 service : {
   "getDeviceAliases" : () -> (vec DeviceAlias) query;
   "getEncryptedSymmetricKey" : (PublicKey) -> (SynchronizeKeyResult) query;
+  "getUnsyncedPublicKeys" : () -> (vec PublicKey) query;
   "isEncryptedSymmetricKeyRegistered" : () -> (bool) query;
   "registerDevice" : (DeviceAlias, PublicKey) -> ();
   "registerEncryptedSymmetricKey" : (PublicKey, EncryptedSymmetricKey) -> (RegisterKeyResult);

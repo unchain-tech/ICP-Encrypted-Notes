@@ -4,14 +4,17 @@ import { v4 as uuidV4 } from 'uuid';
 import {
   _SERVICE,
   RegisterKeyResult,
+  SynchronizeKeyResult,
 } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
-import { loadKey, storeKey } from './keyStorage';
+import { clearKeys, loadKey, storeKey } from './keyStorage';
 
 export class CryptoService {
   private actor: ActorSubclass<_SERVICE>;
+  private intervalId: number | null = null;
   private publicKey: CryptoKey | null;
   private privateKey: CryptoKey | null;
   private symmetricKey: CryptoKey | null;
+  private exportedPublicKeyBase64: string | null;
   public readonly deviceAlias: string;
 
   /** STEP1: コンストラクタを定義する */
@@ -29,8 +32,7 @@ export class CryptoService {
   /**
    * 鍵に関する設定を行う初期化関数です。
    */
-  // TODO: 鍵の生成・同期処理を実装する際に、戻り値を`bool`にする
-  public async init(): Promise<void> {
+  public async init(): Promise<boolean> {
     /** STEP4: 公開鍵・秘密鍵の取得と保存 */
     // データベースから公開鍵・秘密鍵を取得します。
     this.publicKey = await loadKey('publicKey');
@@ -53,11 +55,14 @@ export class CryptoService {
       'spki',
       this.publicKey,
     );
-    const exportedPublicKeyBase64 = this.arrayBufferToBase64(exportedPublicKey);
+    this.exportedPublicKeyBase64 = this.arrayBufferToBase64(exportedPublicKey);
 
     /** STEP2: デバイスデータの登録*/
     // バックエンドキャニスターにデバイスエイリアスと（"STEP4"が完了したら）公開鍵を登録します。
-    await this.actor.registerDevice(this.deviceAlias, exportedPublicKeyBase64);
+    await this.actor.registerDevice(
+      this.deviceAlias,
+      this.exportedPublicKeyBase64,
+    );
 
     /** STEP5: 対称鍵を取得する */
     const isSymKeyRegistered =
@@ -67,16 +72,14 @@ export class CryptoService {
       // 対称鍵を生成します。
       this.symmetricKey = await this.generateSymmetricKey();
       // 対称鍵を公開鍵で暗号化します。
-      const wrappedSymmetricKey: ArrayBuffer = await this.wrapSymmetricKey(
+      const wrappedSymmetricKeyBase64: string = await this.wrapSymmetricKey(
         this.symmetricKey,
         this.publicKey,
       );
-      const wrappedSymmetricKeyBase64: string =
-        this.arrayBufferToBase64(wrappedSymmetricKey);
       // 暗号化した対称鍵をバックエンドキャニスターに登録します。
       const result: RegisterKeyResult =
         await this.actor.registerEncryptedSymmetricKey(
-          exportedPublicKeyBase64,
+          this.exportedPublicKeyBase64,
           wrappedSymmetricKeyBase64,
         );
       if ('Err' in result) {
@@ -90,17 +93,72 @@ export class CryptoService {
           throw new Error('Device not registered');
         }
       }
+
+      /** STEP6: 対称鍵を同期する */
       console.log('Synchronizing symmetric keys...');
+      if (this.intervalId === null) {
+        this.intervalId = window.setInterval(
+          () => this.syncSymmetricKey(),
+          5000,
+        );
+      }
+
+      return true;
     } else {
       console.log('Get symmetric key...');
-      // TODO: 対称鍵の取得処理を実装する
+      const synced = await this.trySyncSymmetricKey();
+
+      return synced;
+    }
+  }
+
+  public async trySyncSymmetricKey(): Promise<boolean> {
+    // 対称鍵が同期されているか確認します。
+    const syncedSymmetricKey: SynchronizeKeyResult =
+      await this.actor.getEncryptedSymmetricKey(this.exportedPublicKeyBase64);
+    if ('Err' in syncedSymmetricKey) {
+      if ('UnknownPublicKey' in syncedSymmetricKey.Err) {
+        throw new Error('Unknown public key');
+      }
+      if ('DeviceNotRegistered' in syncedSymmetricKey.Err) {
+        throw new Error('Device not registered');
+      }
+      if ('KeyNotSynchronized') {
+        console.log('Symmetric key is not synchronized');
+        return false;
+      }
+    } else {
+      this.symmetricKey = await this.unwrapSymmetricKey(
+        syncedSymmetricKey.Ok,
+        this.privateKey,
+      );
+      // 対称鍵が取得できたので、このデバイスでも鍵の同期処理を開始します。
+      console.log(`Check intervalId: ${this.intervalId}`); // TODO: delete
+      if (this.intervalId === null) {
+        console.log('Try syncing symmetric keys...');
+        this.intervalId = window.setInterval(
+          () => this.syncSymmetricKey(),
+          5000,
+        );
+      }
+      return true;
     }
   }
 
   /** STEP3: デバイスデータの削除 */
   public async clearDeviceData(): Promise<void> {
+    if (this.intervalId !== null) {
+      window.clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+
+    await clearKeys();
     window.localStorage.removeItem('deviceAlias');
-    // TODO: データベース内の鍵の削除を実装する
+
+    this.publicKey = null;
+    this.privateKey = null;
+    this.symmetricKey = null;
+    this.exportedPublicKeyBase64 = null;
   }
 
   // TODO: 以下の関数はスターターに入れておく
@@ -140,7 +198,7 @@ export class CryptoService {
   private async wrapSymmetricKey(
     symmetricKey: CryptoKey,
     wrappingKey: CryptoKey,
-  ): Promise<ArrayBuffer> {
+  ): Promise<string> {
     const wrappedSymmetricKey = await window.crypto.subtle.wrapKey(
       'raw',
       symmetricKey,
@@ -149,7 +207,83 @@ export class CryptoService {
         name: 'RSA-OAEP',
       },
     );
-    return wrappedSymmetricKey;
+
+    const wrappedSymmetricKeyBase64: string =
+      this.arrayBufferToBase64(wrappedSymmetricKey);
+
+    return wrappedSymmetricKeyBase64;
+  }
+
+  private async unwrapSymmetricKey(
+    wrappedSymmetricKeyBase64: string,
+    unwrappingKey: CryptoKey,
+  ): Promise<CryptoKey> {
+    const wrappedSymmetricKey: ArrayBuffer = this.base64ToArrayBuffer(
+      wrappedSymmetricKeyBase64,
+    );
+
+    const symmetricKey = await window.crypto.subtle.unwrapKey(
+      'raw',
+      wrappedSymmetricKey,
+      unwrappingKey,
+      {
+        name: 'RSA-OAEP',
+      },
+      {
+        name: 'AES-GCM',
+        length: 256,
+      },
+      true,
+      ['encrypt', 'decrypt'],
+    );
+
+    return symmetricKey;
+  }
+  /**
+   * 対称鍵を同期する関数です。
+   *
+   * see: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#subjectpublickeyinfo_import
+   */
+  private async syncSymmetricKey(): Promise<void> {
+    console.log('Syncing symmetric keys...');
+    if (this.symmetricKey === null) {
+      throw new Error('Symmetric key is not generated');
+    }
+
+    // 同期されていないデバイスの公開鍵を取得する
+    const unsyncedPublicKeys: string[] =
+      await this.actor.getUnsyncedPublicKeys();
+    const symmetricKey = this.symmetricKey;
+    const encryptedKeys: Array<[string, string]> = [];
+
+    for (const unsyncedPublicKey of unsyncedPublicKeys) {
+      const publicKey: CryptoKey = await window.crypto.subtle.importKey(
+        'spki',
+        this.base64ToArrayBuffer(unsyncedPublicKey),
+        {
+          name: 'RSA-OAEP',
+          hash: 'SHA-256',
+        },
+        true,
+        ['wrapKey'],
+      );
+      const wrappedSymmetricKeyBase64: string = await this.wrapSymmetricKey(
+        symmetricKey,
+        publicKey,
+      );
+      // 公開鍵と暗号化した対称鍵をペアにして保存します。
+      encryptedKeys.push([unsyncedPublicKey, wrappedSymmetricKeyBase64]);
+    }
+    // `encryptedKeys`をバックエンドキャニスターにアップロードします。
+    const result = await this.actor.uploadEncryptedSymmetricKeys(encryptedKeys);
+    if ('Err' in result) {
+      if ('UnknownPublicKey' in result.Err) {
+        throw new Error('Unknown public key');
+      }
+      if ('DeviceNotRegistered' in result.Err) {
+        throw new Error('Device not registered');
+      }
+    }
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
