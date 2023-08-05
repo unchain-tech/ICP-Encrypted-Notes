@@ -1,28 +1,14 @@
 import { Box, SimpleGrid, useDisclosure } from '@chakra-ui/react';
-import { ActorSubclass } from '@dfinity/agent';
-import { AuthClient } from '@dfinity/auth-client';
 import { FC, useEffect, useState } from 'react';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { _SERVICE } from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import { DeleteItemDialog, Layout } from '../../components';
 import { DeviceCard } from '../../components/DeviceCard';
 import { useDeviceCheck } from '../../hooks';
-import { CryptoService } from '../../lib/cryptoService';
+import { useAuthContext } from '../../hooks/authContext';
 
-interface DevicesProps {
-  actor: ActorSubclass<_SERVICE>;
-  client: AuthClient;
-  cryptoService: CryptoService;
-  checkAuthenticated: (navigate: NavigateFunction) => Promise<void>;
-}
-
-export const Devices: FC<DevicesProps> = ({
-  actor,
-  client,
-  cryptoService,
-  checkAuthenticated,
-}) => {
+export const Devices: FC = () => {
+  const { auth } = useAuthContext();
   const {
     isOpen: isOpenDeleteDialog,
     onOpen: onOpenDeleteDialog,
@@ -32,7 +18,7 @@ export const Devices: FC<DevicesProps> = ({
   const [deviceAliases, setDeviceAliases] = useState<string[]>([]);
   const [deleteAlias, setDeleteAlias] = useState<string | undefined>(undefined);
 
-  useDeviceCheck(actor, client, cryptoService);
+  useDeviceCheck();
 
   const openDeleteDialog = (alias: string) => {
     setDeleteAlias(alias);
@@ -40,8 +26,12 @@ export const Devices: FC<DevicesProps> = ({
   };
 
   const getDevices = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      const deviceAliases = await actor.getDeviceAliases();
+      const deviceAliases = await auth.actor.getDeviceAliases();
       setDeviceAliases(deviceAliases);
     } catch (err) {
       console.error(err);
@@ -49,8 +39,12 @@ export const Devices: FC<DevicesProps> = ({
   };
 
   const deleteDevice = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      await actor.deleteDevice(deleteAlias);
+      await auth.actor.deleteDevice(deleteAlias);
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,18 +54,22 @@ export const Devices: FC<DevicesProps> = ({
   };
 
   useEffect(() => {
-    checkAuthenticated(navigate);
-  }, []);
-
-  useEffect(() => {
+    if (auth.status === 'ANONYMOUS') {
+      navigate('/');
+    }
+    if (auth.status === 'SYNCHRONIZING') {
+      return;
+    }
     (async () => {
-      if (actor) {
-        await getDevices();
-      }
+      await getDevices();
     })();
-  }, [actor, cryptoService]);
+  }, [auth]);
 
-  if (cryptoService === undefined) {
+  if (auth.status === 'ANONYMOUS') {
+    return null;
+  }
+
+  if (auth.status === 'SYNCHRONIZING') {
     return (
       <Layout>
         <Box p={6} overflowY={'auto'} maxHeight={'calc(100vh - 64px)'}>
@@ -90,7 +88,7 @@ export const Devices: FC<DevicesProps> = ({
               <DeviceCard
                 key={index}
                 deviceAlias={deviceAlias}
-                isCurrentDevice={deviceAlias === cryptoService.deviceAlias}
+                isCurrentDevice={deviceAlias === auth.cryptoService.deviceAlias}
                 handleOpenDeleteDialog={openDeleteDialog}
               />
             ))}

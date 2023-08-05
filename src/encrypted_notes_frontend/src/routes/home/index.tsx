@@ -1,13 +1,26 @@
 import { Box, Button, Heading, Text } from '@chakra-ui/react';
 import { FC } from 'react';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-interface HomeProps {
-  handleAuthentication: (navigete: NavigateFunction) => void;
-}
+import { useMessage } from '../../hooks';
+import { useAuthContext } from '../../hooks/authContext';
 
-export const Home: FC<HomeProps> = ({ handleAuthentication }) => {
+export const Home: FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuthContext();
+  const { showMessage } = useMessage();
+
+  const handleLogin = async () => {
+    await login()
+      .then(() => {
+        showMessage({ title: 'Authenticated', status: 'success' });
+        navigate('/notes');
+      })
+      .catch((err) => {
+        showMessage({ title: 'Authentication failed', status: 'error' });
+        console.error(err);
+      });
+  };
 
   return (
     <Box
@@ -32,7 +45,7 @@ export const Home: FC<HomeProps> = ({ handleAuthentication }) => {
       <Button
         colorScheme={'green'}
         size={{ base: 'sm', lg: 'lg' }}
-        onClick={() => handleAuthentication(navigate)}
+        onClick={handleLogin}
       >
         Authenticate
       </Button>

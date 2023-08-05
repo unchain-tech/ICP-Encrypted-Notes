@@ -1,14 +1,9 @@
 import { Box, Button, Flex, SimpleGrid, useDisclosure } from '@chakra-ui/react';
-import type { ActorSubclass } from '@dfinity/agent';
-import { AuthClient } from '@dfinity/auth-client';
 import { FC, useEffect, useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import type {
-  _SERVICE,
-  EncryptedNote,
-} from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+import type { EncryptedNote } from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import {
   DeleteItemDialog,
   Layout,
@@ -16,21 +11,9 @@ import {
   NoteModal,
 } from '../../components';
 import { useDeviceCheck } from '../../hooks';
-import { CryptoService } from '../../lib/cryptoService';
+import { useAuthContext } from '../../hooks/authContext';
 
-interface NotesProps {
-  actor: ActorSubclass<_SERVICE>;
-  client: AuthClient;
-  cryptoService: CryptoService;
-  checkAuthenticated: (navigate: NavigateFunction) => Promise<void>;
-}
-
-export const Notes: FC<NotesProps> = ({
-  actor,
-  client,
-  cryptoService,
-  checkAuthenticated,
-}) => {
+export const Notes: FC = () => {
   const navigate = useNavigate();
   const {
     isOpen: isOpenNoteModal,
@@ -42,6 +25,7 @@ export const Notes: FC<NotesProps> = ({
     onOpen: onOpenDeleteDialog,
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
+  const { auth } = useAuthContext();
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [notes, setNotes] = useState<EncryptedNote[]>([]);
   const [currentNote, setCurrentNote] = useState<EncryptedNote | undefined>(
@@ -49,7 +33,7 @@ export const Notes: FC<NotesProps> = ({
   );
   const [deleteId, setDeleteId] = useState<bigint | undefined>(undefined);
 
-  useDeviceCheck(actor, client, cryptoService);
+  useDeviceCheck();
 
   const openAddNoteModal = () => {
     setMode('add');
@@ -69,8 +53,12 @@ export const Notes: FC<NotesProps> = ({
   };
 
   const getNotes = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      const notes = await actor.getNotes();
+      const notes = await auth.actor.getNotes();
       setNotes(notes);
     } catch (err) {
       console.error(err);
@@ -78,8 +66,12 @@ export const Notes: FC<NotesProps> = ({
   };
 
   const addNote = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      await actor.addNote(currentNote.encrypted_text);
+      await auth.actor.addNote(currentNote.encrypted_text);
     } catch (err) {
       console.error(err);
     } finally {
@@ -89,8 +81,12 @@ export const Notes: FC<NotesProps> = ({
   };
 
   const updateNote = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      await actor.updateNote(currentNote);
+      await auth.actor.updateNote(currentNote);
     } catch (err) {
       console.error(err);
     } finally {
@@ -100,8 +96,12 @@ export const Notes: FC<NotesProps> = ({
   };
 
   const deleteNote = async () => {
+    if (auth.status !== 'SYNCED') {
+      console.error(`CryptoService is not synced.`);
+      return;
+    }
     try {
-      await actor.deleteNote(deleteId);
+      await auth.actor.deleteNote(deleteId);
     } catch (err) {
       console.error(err);
     } finally {
@@ -111,16 +111,26 @@ export const Notes: FC<NotesProps> = ({
   };
 
   useEffect(() => {
-    checkAuthenticated(navigate);
-  }, []);
-
-  useEffect(() => {
+    if (auth.status === 'ANONYMOUS') {
+      navigate('/');
+    }
+    if (auth.status === 'SYNCHRONIZING') {
+      return;
+    }
     (async () => {
-      if (actor) {
-        await getNotes();
-      }
+      await getNotes();
     })();
-  }, [actor]);
+  }, [auth.status]);
+
+  if (auth.status === 'SYNCHRONIZING') {
+    return (
+      <Layout>
+        <Box p={6} overflowY={'auto'} maxHeight={'calc(100vh - 64px)'}>
+          Loading...
+        </Box>
+      </Layout>
+    );
+  }
 
   return (
     <>

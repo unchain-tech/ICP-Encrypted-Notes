@@ -2,6 +2,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
+import { AuthContext, useAuthProvider } from './hooks/authContext';
 
 const container = document.getElementById('app');
 if (!container) {
@@ -9,8 +10,18 @@ if (!container) {
 }
 const root = createRoot(container);
 
+const AuthProvier = ({ children }) => {
+  return (
+    <AuthContext.Provider value={useAuthProvider()}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
 root.render(
   <ChakraProvider>
-    <App />
+    <AuthProvier>
+      <App />
+    </AuthProvier>
   </ChakraProvider>,
 );
