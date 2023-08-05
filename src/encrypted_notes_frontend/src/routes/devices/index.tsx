@@ -2,8 +2,7 @@ import { Box, SimpleGrid, useDisclosure } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { DeleteItemDialog, Layout } from '../../components';
-import { DeviceCard } from '../../components/DeviceCard';
+import { DeleteItemDialog, DeviceCard, Layout } from '../../components';
 import { useDeviceCheck } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
