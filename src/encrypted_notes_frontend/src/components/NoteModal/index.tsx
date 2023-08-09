@@ -31,7 +31,7 @@ export const NoteModal: FC<NoteModalProps> = ({
   onClose,
   setCurrentNote,
 }) => {
-  const safeCurrentNote = currentNote || { id: BigInt(0), encrypted_text: '' };
+  const safeCurrentNote = currentNote || { id: BigInt(0), data: '' };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
@@ -43,11 +43,11 @@ export const NoteModal: FC<NoteModalProps> = ({
           <FormControl>
             <Textarea
               placeholder="Write your note here..."
-              value={safeCurrentNote.encrypted_text}
+              value={safeCurrentNote.data}
               onChange={(e) =>
                 setCurrentNote({
                   id: safeCurrentNote.id,
-                  encrypted_text: e.target.value,
+                  data: e.target.value,
                 })
               }
             />

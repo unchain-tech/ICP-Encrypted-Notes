@@ -129,12 +129,12 @@ fn get_notes() -> Vec<EncryptedNote> {
 }
 
 #[update(name = "addNote")]
-fn add_note(encrypted_text: String) {
+fn add_note(data: String) {
     let caller = caller();
     assert!(is_caller_registered(caller));
 
     NOTES.with(|notes| {
-        notes.borrow_mut().add_note(caller, encrypted_text);
+        notes.borrow_mut().add_note(caller, data);
     })
 }
 

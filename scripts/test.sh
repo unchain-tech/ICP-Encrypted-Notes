@@ -116,7 +116,7 @@ compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
 FUNCTION='getNotes'
 echo -e "\n===== $FUNCTION ====="
-EXPECT='(vec { record { id = 0 : nat; encrypted_text = "First text!" } })'
+EXPECT='(vec { record { id = 0 : nat; data = "First text!" } })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Return note list" "$EXPECT" "$RESULT" || TEST_STATUS=1
 
@@ -126,13 +126,13 @@ EXPECT='()'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION '(
   record {
     id = 0;
-    encrypted_text = "Updated first text!"
+    data = "Updated first text!"
   }
 )'`
 compare_result "Return none" "$EXPECT" "$RESULT" || TEST_STATUS=1
 # 確認
 FUNCTION='getNotes'
-EXPECT='(vec { record { id = 0 : nat; encrypted_text = "Updated first text!" } })'
+EXPECT='(vec { record { id = 0 : nat; data = "Updated first text!" } })'
 RESULT=`dfx canister call encrypted_notes_backend $FUNCTION`
 compare_result "Check with $FUNCTION" "$EXPECT" "$RESULT" || TEST_STATUS=1
 

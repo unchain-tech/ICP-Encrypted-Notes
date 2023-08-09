@@ -28,7 +28,7 @@ export const NoteCard: FC<NoteCardProps> = ({
     <Card variant={'outline'}>
       <CardBody>
         <Stack mt={'6'} spacing={'3'}>
-          <Text>{note.encrypted_text}</Text>
+          <Text>{note.data}</Text>
         </Stack>
       </CardBody>
       <Divider />

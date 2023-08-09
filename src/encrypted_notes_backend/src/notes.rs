@@ -6,7 +6,7 @@ use std::collections::HashMap;
 #[derive(CandidType, Clone, Serialize, Deserialize)]
 pub struct EncryptedNote {
     pub id: u128,
-    pub encrypted_text: String,
+    pub data: String,
 }
 
 #[derive(Default)]
@@ -19,10 +19,10 @@ impl Notes {
         self.notes.get(&caller).cloned().unwrap_or_default()
     }
 
-    pub fn add_note(&mut self, caller: Principal, encrypted_text: String) {
+    pub fn add_note(&mut self, caller: Principal, data: String) {
         let notes_of_caller = self.notes.entry(caller).or_default();
         let id = notes_of_caller.len() as u128;
-        notes_of_caller.push(EncryptedNote { id, encrypted_text });
+        notes_of_caller.push(EncryptedNote { id, data });
     }
 
     pub fn delete_note(&mut self, caller: Principal, id: u128) {
@@ -37,7 +37,7 @@ impl Notes {
             .get_mut(&caller)
             .and_then(|notes_of_caller| notes_of_caller.iter_mut().find(|n| n.id == new_note.id))
         {
-            current_note.encrypted_text = new_note.encrypted_text;
+            current_note.data = new_note.data;
         }
     }
 }

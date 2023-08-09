@@ -63,12 +63,10 @@ export const Notes: FC = () => {
       const notes = await auth.actor.getNotes();
       // ノートの復号
       for (const note of notes) {
-        const decryptedData = await auth.cryptoService.decryptNote(
-          note.encrypted_text,
-        );
+        const decryptedData = await auth.cryptoService.decryptNote(note.data);
         decryptedNotes.push({
           id: note.id,
-          encrypted_text: decryptedData,
+          data: decryptedData,
         });
       }
       setNotes(decryptedNotes);
@@ -85,7 +83,7 @@ export const Notes: FC = () => {
     try {
       // ノートの暗号化
       const encryptedNote = await auth.cryptoService.encryptNote(
-        currentNote.encrypted_text,
+        currentNote.data,
       );
       await auth.actor.addNote(encryptedNote);
     } catch (err) {
@@ -104,11 +102,11 @@ export const Notes: FC = () => {
     try {
       // ノートの暗号化
       const encryptedData = await auth.cryptoService.encryptNote(
-        currentNote.encrypted_text,
+        currentNote.data,
       );
       const encryptedNote = {
         id: currentNote.id,
-        encrypted_text: encryptedData,
+        data: encryptedData,
       };
       await auth.actor.updateNote(encryptedNote);
     } catch (err) {

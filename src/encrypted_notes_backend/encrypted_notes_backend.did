@@ -4,7 +4,7 @@ type EncryptedSymmetricKey = text;
 
 type EncryptedNote = record {
   "id" : nat;
-  "encrypted_text" : text;
+  "data" : text;
 };
 
 type DeviceError = variant {
