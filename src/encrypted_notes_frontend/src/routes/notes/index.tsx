@@ -57,9 +57,21 @@ export const Notes: FC = () => {
       console.error(`CryptoService is not synced.`);
       return;
     }
+
     try {
+      const decryptedNotes = new Array<EncryptedNote>();
       const notes = await auth.actor.getNotes();
-      setNotes(notes);
+      // ノートの復号
+      for (const note of notes) {
+        const decryptedData = await auth.cryptoService.decryptNote(
+          note.encrypted_text,
+        );
+        decryptedNotes.push({
+          id: note.id,
+          encrypted_text: decryptedData,
+        });
+      }
+      setNotes(decryptedNotes);
     } catch (err) {
       console.error(err);
     }
@@ -71,7 +83,11 @@ export const Notes: FC = () => {
       return;
     }
     try {
-      await auth.actor.addNote(currentNote.encrypted_text);
+      // ノートの暗号化
+      const encryptedNote = await auth.cryptoService.encryptNote(
+        currentNote.encrypted_text,
+      );
+      await auth.actor.addNote(encryptedNote);
     } catch (err) {
       console.error(err);
     } finally {
@@ -86,7 +102,15 @@ export const Notes: FC = () => {
       return;
     }
     try {
-      await auth.actor.updateNote(currentNote);
+      // ノートの暗号化
+      const encryptedData = await auth.cryptoService.encryptNote(
+        currentNote.encrypted_text,
+      );
+      const encryptedNote = {
+        id: currentNote.id,
+        encrypted_text: encryptedData,
+      };
+      await auth.actor.updateNote(encryptedNote);
     } catch (err) {
       console.error(err);
     } finally {
