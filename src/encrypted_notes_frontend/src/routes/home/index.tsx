@@ -1,5 +1,5 @@
 import { Box, Button, Heading, Text } from '@chakra-ui/react';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useMessage } from '../../hooks';
@@ -9,8 +9,10 @@ export const Home: FC = () => {
   const navigate = useNavigate();
   const { login } = useAuthContext();
   const { showMessage } = useMessage();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       await login();
       showMessage({
@@ -22,6 +24,8 @@ export const Home: FC = () => {
     } catch (err) {
       showMessage({ title: 'Failed to authenticate', status: 'error' });
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,6 +51,7 @@ export const Home: FC = () => {
       </Text>
       <Button
         colorScheme={'green'}
+        isLoading={isLoading}
         size={{ base: 'sm', lg: 'lg' }}
         onClick={handleLogin}
       >

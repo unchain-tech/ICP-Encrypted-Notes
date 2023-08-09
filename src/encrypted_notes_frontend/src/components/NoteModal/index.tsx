@@ -16,6 +16,7 @@ import type { EncryptedNote } from '../../../../declarations/encrypted_notes_bac
 
 interface NoteModalProps {
   currentNote: EncryptedNote;
+  isLoading: boolean;
   isOpen: boolean;
   title: string;
   handleSaveNote: () => void;
@@ -25,6 +26,7 @@ interface NoteModalProps {
 
 export const NoteModal: FC<NoteModalProps> = ({
   currentNote,
+  isLoading,
   isOpen,
   title,
   handleSaveNote,
@@ -55,7 +57,12 @@ export const NoteModal: FC<NoteModalProps> = ({
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme={'blue'} mr={3} onClick={handleSaveNote}>
+          <Button
+            colorScheme={'blue'}
+            mr={3}
+            isLoading={isLoading}
+            onClick={handleSaveNote}
+          >
             Save
           </Button>
           <Button variant="ghost" onClick={onClose}>

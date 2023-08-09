@@ -34,6 +34,7 @@ export const Notes: FC = () => {
     undefined,
   );
   const [deleteId, setDeleteId] = useState<bigint | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   useDeviceCheck();
 
@@ -85,12 +86,14 @@ export const Notes: FC = () => {
       console.error(`CryptoService is not synced.`);
       return;
     }
+    setIsLoading(true);
     try {
       // ノートの暗号化
       const encryptedNote = await auth.cryptoService.encryptNote(
         currentNote.data,
       );
       await auth.actor.addNote(encryptedNote);
+      await getNotes();
     } catch (err) {
       showMessage({
         title: 'Failed to add note',
@@ -98,7 +101,7 @@ export const Notes: FC = () => {
       });
     } finally {
       onCloseNoteModal();
-      await getNotes();
+      setIsLoading(false);
     }
   };
 
@@ -107,6 +110,7 @@ export const Notes: FC = () => {
       console.error(`CryptoService is not synced.`);
       return;
     }
+    setIsLoading(true);
     try {
       // ノートの暗号化
       const encryptedData = await auth.cryptoService.encryptNote(
@@ -117,6 +121,7 @@ export const Notes: FC = () => {
         data: encryptedData,
       };
       await auth.actor.updateNote(encryptedNote);
+      await getNotes();
     } catch (err) {
       showMessage({
         title: 'Failed to update note',
@@ -124,7 +129,7 @@ export const Notes: FC = () => {
       });
     } finally {
       onCloseNoteModal();
-      await getNotes();
+      setIsLoading(false);
     }
   };
 
@@ -133,8 +138,10 @@ export const Notes: FC = () => {
       console.error(`CryptoService is not synced.`);
       return;
     }
+    setIsLoading(true);
     try {
       await auth.actor.deleteNote(deleteId);
+      await getNotes();
     } catch (err) {
       showMessage({
         title: 'Failed to delete note',
@@ -142,7 +149,7 @@ export const Notes: FC = () => {
       });
     } finally {
       onCloseDeleteDialog();
-      await getNotes();
+      setIsLoading(false);
     }
   };
 
@@ -203,6 +210,7 @@ export const Notes: FC = () => {
       </Layout>
 
       <NoteModal
+        isLoading={isLoading}
         isOpen={isOpenNoteModal}
         onClose={onCloseNoteModal}
         title={mode === 'add' ? 'Add Note' : 'Edit Note'}
@@ -212,6 +220,7 @@ export const Notes: FC = () => {
       />
 
       <DeleteItemDialog
+        isLoading={isLoading}
         isOpen={isOpenDeleteDialog}
         onClose={onCloseDeleteDialog}
         title={`Delete Note`}

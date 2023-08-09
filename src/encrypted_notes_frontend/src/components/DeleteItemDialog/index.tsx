@@ -9,6 +9,7 @@ import {
 import { FC, useRef } from 'react';
 
 interface DeleteItemDialogProps {
+  isLoading: boolean;
   isOpen: boolean;
   title: string;
   handleDeleteItem: () => void;
@@ -16,6 +17,7 @@ interface DeleteItemDialogProps {
 }
 
 export const DeleteItemDialog: FC<DeleteItemDialogProps> = ({
+  isLoading,
   isOpen,
   title,
   handleDeleteItem,
@@ -38,7 +40,12 @@ export const DeleteItemDialog: FC<DeleteItemDialogProps> = ({
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={handleDeleteItem} ml={3}>
+            <Button
+              colorScheme="red"
+              isLoading={isLoading}
+              onClick={handleDeleteItem}
+              ml={3}
+            >
               Delete
             </Button>
           </AlertDialogFooter>

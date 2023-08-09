@@ -17,6 +17,7 @@ export const Devices: FC = () => {
   const navigate = useNavigate();
   const [deviceAliases, setDeviceAliases] = useState<string[]>([]);
   const [deleteAlias, setDeleteAlias] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   useDeviceCheck();
 
@@ -46,8 +47,10 @@ export const Devices: FC = () => {
       console.error(`CryptoService is not synced.`);
       return;
     }
+    setIsLoading(true);
     try {
       await auth.actor.deleteDevice(deleteAlias);
+      await getDevices();
     } catch (err) {
       console.error(err);
       showMessage({
@@ -56,7 +59,7 @@ export const Devices: FC = () => {
       });
     } finally {
       onCloseDeleteDialog();
-      await getDevices();
+      setIsLoading(false);
     }
   };
 
@@ -104,6 +107,7 @@ export const Devices: FC = () => {
       </Layout>
 
       <DeleteItemDialog
+        isLoading={isLoading}
         isOpen={isOpenDeleteDialog}
         onClose={onCloseDeleteDialog}
         title={'Delete Device'}
