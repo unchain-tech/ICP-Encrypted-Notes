@@ -10,7 +10,7 @@ import {
   NoteCard,
   NoteModal,
 } from '../../components';
-import { useDeviceCheck } from '../../hooks';
+import { useDeviceCheck, useMessage } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
 export const Notes: FC = () => {
@@ -26,6 +26,8 @@ export const Notes: FC = () => {
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
   const { auth } = useAuthContext();
+  const { showMessage } = useMessage();
+
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [notes, setNotes] = useState<EncryptedNote[]>([]);
   const [currentNote, setCurrentNote] = useState<EncryptedNote | undefined>(
@@ -71,7 +73,10 @@ export const Notes: FC = () => {
       }
       setNotes(decryptedNotes);
     } catch (err) {
-      console.error(err);
+      showMessage({
+        title: 'Failed to get notes',
+        status: 'error',
+      });
     }
   };
 
@@ -87,7 +92,10 @@ export const Notes: FC = () => {
       );
       await auth.actor.addNote(encryptedNote);
     } catch (err) {
-      console.error(err);
+      showMessage({
+        title: 'Failed to add note',
+        status: 'error',
+      });
     } finally {
       onCloseNoteModal();
       await getNotes();
@@ -110,7 +118,10 @@ export const Notes: FC = () => {
       };
       await auth.actor.updateNote(encryptedNote);
     } catch (err) {
-      console.error(err);
+      showMessage({
+        title: 'Failed to update note',
+        status: 'error',
+      });
     } finally {
       onCloseNoteModal();
       await getNotes();
@@ -125,7 +136,10 @@ export const Notes: FC = () => {
     try {
       await auth.actor.deleteNote(deleteId);
     } catch (err) {
-      console.error(err);
+      showMessage({
+        title: 'Failed to delete note',
+        status: 'error',
+      });
     } finally {
       onCloseDeleteDialog();
       await getNotes();

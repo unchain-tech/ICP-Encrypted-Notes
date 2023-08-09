@@ -164,14 +164,20 @@ export const useAuthProvider = (): AuthState => {
               break;
             }
           } catch (err) {
-            showMessage({ title: 'Key sync failed', status: 'error' });
+            showMessage({
+              title: 'Failed to synchronize symmetric key',
+              status: 'error',
+            });
           }
         }
       }
 
       setAuth({ actor, authClient, cryptoService, status: 'SYNCED' });
     } catch (err) {
-      showMessage({ title: 'Authentication failed', status: 'error' });
+      showMessage({
+        title: 'Failed to check authentication',
+        status: 'error',
+      });
     }
   };
 

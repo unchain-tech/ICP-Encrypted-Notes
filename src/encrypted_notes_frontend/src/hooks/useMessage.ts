@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 type showMessageProps = {
   title: string;
+  duration?: number | null;
   status: 'info' | 'warning' | 'success' | 'error';
 };
 
@@ -11,13 +12,13 @@ export const useMessage = () => {
 
   const showMessage = useCallback(
     (props: showMessageProps) => {
-      const { title, status } = props;
+      const { title, duration = null, status } = props;
 
       toast({
         title,
         status,
         position: 'top',
-        duration: 2000,
+        duration: duration,
         isClosable: true,
       });
     },

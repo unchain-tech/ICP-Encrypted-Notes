@@ -23,18 +23,17 @@ export const useDeviceCheck = () => {
           (deviceAlias) => deviceAlias === auth.cryptoService.deviceAlias,
         )
       ) {
-        await logout()
-          .then(() => {
-            showMessage({
-              title: 'This device has been deleted.',
-              status: 'info',
-            });
-            navigate('/');
-          })
-          .catch((err) => {
-            showMessage({ title: 'Logout failed', status: 'error' });
-            console.error(err);
+        try {
+          await logout();
+          showMessage({
+            title: 'This device has been deleted.',
+            status: 'info',
           });
+          navigate('/');
+        } catch (err) {
+          showMessage({ title: 'Failed to logout', status: 'error' });
+          console.error(err);
+        }
       }
     }, 1000);
 

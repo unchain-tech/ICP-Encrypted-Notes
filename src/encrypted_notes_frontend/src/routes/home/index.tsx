@@ -11,15 +11,18 @@ export const Home: FC = () => {
   const { showMessage } = useMessage();
 
   const handleLogin = async () => {
-    await login()
-      .then(() => {
-        showMessage({ title: 'Authenticated', status: 'success' });
-        navigate('/notes');
-      })
-      .catch((err) => {
-        showMessage({ title: 'Authentication failed', status: 'error' });
-        console.error(err);
+    try {
+      await login();
+      showMessage({
+        title: 'Authentication succeeded',
+        duration: 2000,
+        status: 'success',
       });
+      navigate('/notes');
+    } catch (err) {
+      showMessage({ title: 'Failed to authenticate', status: 'error' });
+      console.error(err);
+    }
   };
 
   return (

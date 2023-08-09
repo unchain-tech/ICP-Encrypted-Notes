@@ -3,11 +3,12 @@ import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DeleteItemDialog, DeviceCard, Layout } from '../../components';
-import { useDeviceCheck } from '../../hooks';
+import { useDeviceCheck, useMessage } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
 export const Devices: FC = () => {
   const { auth } = useAuthContext();
+  const { showMessage } = useMessage();
   const {
     isOpen: isOpenDeleteDialog,
     onOpen: onOpenDeleteDialog,
@@ -33,7 +34,10 @@ export const Devices: FC = () => {
       const deviceAliases = await auth.actor.getDeviceAliases();
       setDeviceAliases(deviceAliases);
     } catch (err) {
-      console.error(err);
+      showMessage({
+        title: 'Failed to get devices',
+        status: 'error',
+      });
     }
   };
 
@@ -46,6 +50,10 @@ export const Devices: FC = () => {
       await auth.actor.deleteDevice(deleteAlias);
     } catch (err) {
       console.error(err);
+      showMessage({
+        title: 'Failed to delete device',
+        status: 'error',
+      });
     } finally {
       onCloseDeleteDialog();
       await getDevices();
