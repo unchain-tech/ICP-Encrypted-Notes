@@ -12,6 +12,7 @@ pub struct EncryptedNote {
 #[derive(Default)]
 pub struct Notes {
     pub notes: HashMap<Principal, Vec<EncryptedNote>>,
+    pub counter: u128,
 }
 
 impl Notes {
@@ -21,8 +22,12 @@ impl Notes {
 
     pub fn add_note(&mut self, caller: Principal, data: String) {
         let notes_of_caller = self.notes.entry(caller).or_default();
-        let id = notes_of_caller.len() as u128;
-        notes_of_caller.push(EncryptedNote { id, data });
+
+        notes_of_caller.push(EncryptedNote {
+            id: self.counter,
+            data,
+        });
+        self.counter += 1;
     }
 
     pub fn delete_note(&mut self, caller: Principal, id: u128) {
