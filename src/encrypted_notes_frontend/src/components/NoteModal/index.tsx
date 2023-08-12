@@ -65,7 +65,7 @@ export const NoteModal: FC<NoteModalProps> = ({
           >
             Save
           </Button>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" isDisabled={isLoading} onClick={onClose}>
             Cancel
           </Button>
         </ModalFooter>

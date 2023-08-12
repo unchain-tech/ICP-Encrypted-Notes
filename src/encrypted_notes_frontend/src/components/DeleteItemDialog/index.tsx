@@ -37,7 +37,7 @@ export const DeleteItemDialog: FC<DeleteItemDialogProps> = ({
             {title}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button ref={cancelRef} isDisabled={isLoading} onClick={onClose}>
               Cancel
             </Button>
             <Button
