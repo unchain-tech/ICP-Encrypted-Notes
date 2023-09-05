@@ -1,0 +1,76 @@
+<mxfile host="65bd71144e">
+    <diagram id="oUzKK_ly8LhYVMqGP37K" name="Page-1">
+        <mxGraphModel dx="1574" dy="1294" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="45" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+                    <mxGeometry x="1265" y="366.05" width="120" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#434445;aspect=fixed;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.vvd.web_browser;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="222.5" width="170" height="120.7" as="geometry"/>
+                </mxCell>
+                <mxCell id="47" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#da4026;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="70" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="バックエンドキャニスター" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="1200" y="530.7" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="ブラウザA" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="360" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" value="対称鍵" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="67.5" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#434445;aspect=fixed;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.vvd.web_browser;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="660" width="170" height="120.7" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="ブラウザB" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="800" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="53" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#2072B8;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="120" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="55" target="45">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="55" value="公開鍵A" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="117.5" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="56" value="秘密鍵A" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="167.5" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#7fba42;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="563.2" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" style="edgeStyle=none;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="59" target="45">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="公開鍵B" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="560.7" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" value="秘密鍵B" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="607.5" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="61" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#2072B8;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="1240" y="242.5" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="公開鍵A" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="1220" y="240" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" value="公開鍵B" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="1220" y="302.5" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#CCCBCB;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="610" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="170" width="53" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.security.key_permissions;fillColor=#7fba42;direction=south;" vertex="1" parent="1">
+                    <mxGeometry x="1240" y="305" width="53" height="25" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
