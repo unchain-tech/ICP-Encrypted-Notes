@@ -1,7 +1,7 @@
 {
-  "name": "encrypted_notes_frontend",
+  "name": "icp_encrypted_notes",
   "version": "0.2.0",
-  "description": "Internet Computer starter application",
+  "description": "ICP Encrypted Notes starter kit",
   "keywords": [
     "Internet Computer",
     "Motoko",
