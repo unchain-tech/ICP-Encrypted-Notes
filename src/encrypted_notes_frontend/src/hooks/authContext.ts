@@ -31,20 +31,22 @@ export const useAuthProvider = (): AuthState => {
   const [auth, setAuth] = useState<Auth>(initialize.auth);
 
   const setupService = async (authClient: AuthClient) => {
-    // 認証したユーザーのデータを取得します。
+    /** STEP2: 認証したユーザーのデータを取得します。 */
     const identity = authClient.getIdentity();
 
+    /** STEP3: バックエンドキャニスターを呼び出す準備をします。 */
     // 取得した`identity`を使用して、ICと対話する`agent`を作成します。
     const newAgent = new HttpAgent({ identity });
     if (process.env.DFX_NETWORK === 'local') {
       newAgent.fetchRootKey();
     }
-
     // 認証したユーザーの情報で`actor`を作成します。
     const options = { agent: newAgent };
     const actor = createActor(canisterId, options);
 
+    /** STEP5: CryptoServiceクラスのインスタンスを生成します。 */
     const cryptoService = new CryptoService(actor);
+    /** STEP12: デバイスデータの設定を行います。 */
     const initialized = await cryptoService.init();
     if (initialized) {
       setAuth({ actor, authClient, cryptoService, status: 'SYNCED' });
@@ -52,6 +54,7 @@ export const useAuthProvider = (): AuthState => {
       setAuth({ status: 'SYNCHRONIZING' });
       // 対称鍵が同期されるまで待機します。
       while (true) {
+        // 1秒待機します。
         await new Promise((resolve) => setTimeout(resolve, 1000));
         try {
           console.log('Waiting for key sync...');
@@ -74,20 +77,25 @@ export const useAuthProvider = (): AuthState => {
   };
 
   const login = async (): Promise<void> => {
-    let iiUrl: string;
-    if (process.env.DFX_NETWORK === 'local') {
-      iiUrl = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
-    } else if (process.env.DFX_NETWORK === 'ic') {
-      iiUrl = `https://${process.env.INTERNET_IDENTITY_CANISTER_ID}.ic0.app`;
-    } else {
-      // 他の設定が利用できない場合はローカルを使用します。
-      iiUrl = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
-    }
+    // /** STEP1: 認証機能を実装します。 */
+    const iiUrl = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
+
+    // /** メインネットへデプロイする場合は、下記のように設定します。 */
+    // // let iiUrl: string;
+    // // if (process.env.DFX_NETWORK === 'local') {
+    // //   iiUrl = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
+    // // } else if (process.env.DFX_NETWORK === 'ic') {
+    // //   iiUrl = `https://${process.env.INTERNET_IDENTITY_CANISTER_ID}.ic0.app`;
+    // // } else {
+    // //   // 他の設定が利用できない場合はローカルを使用します。
+    // //   iiUrl = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
+    // // }
 
     return new Promise((resolve, reject) => {
-      // ログイン認証を実行します。
+      // AuthClientオブジェクトを作成します。
       AuthClient.create()
         .then((authClient) => {
+          // 認証画面を開きます。
           authClient.login({
             identityProvider: iiUrl,
             onSuccess: async () => {
@@ -123,8 +131,9 @@ export const useAuthProvider = (): AuthState => {
 
   const checkAuthenticated = async () => {
     const authClient = await AuthClient.create();
+
+    // Internet Identityによる認証が完了しているか確認します。
     const isAuthenticated = await authClient.isAuthenticated();
-    console.log(`isAuthenticated: ${isAuthenticated}`); // TODO: delete
     if (!isAuthenticated) {
       setAuth({ status: 'ANONYMOUS' });
       return;

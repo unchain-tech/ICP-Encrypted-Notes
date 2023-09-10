@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+/// devicesモジュール内のエラーを表す列挙型です。
 #[derive(CandidType, Deserialize, Eq, PartialEq)]
 pub enum DeviceError {
     AlreadyRegistered,
@@ -12,24 +13,29 @@ pub enum DeviceError {
     UnknownPublicKey,
 }
 
+/// 型のエイリアスです。
 pub type DeviceAlias = String;
 pub type PublicKey = String;
 pub type EncryptedSymmetricKey = String;
 pub type RegisterKeyResult = Result<(), DeviceError>;
 pub type SynchronizeKeyResult = Result<EncryptedSymmetricKey, DeviceError>;
 
+/// デバイスのエイリアスと鍵を紐付けて保存する構造体です。
 #[derive(CandidType, Clone, Serialize, Deserialize)]
 pub struct DeviceData {
     pub aliases: HashMap<DeviceAlias, PublicKey>,
     pub keys: HashMap<PublicKey, EncryptedSymmetricKey>,
 }
 
+/// devicesモジュール内のデータを管理する構造体です。
+/// * `devices` - Principalとデバイスデータを紐づけて保存します。
 #[derive(Default)]
 pub struct Devices {
     pub devices: HashMap<Principal, DeviceData>,
 }
 
 impl Devices {
+    /// 指定したPrincipalとデバイスデータを紐付けて登録します。
     pub fn register_device(
         &mut self,
         caller: Principal,
@@ -60,6 +66,7 @@ impl Devices {
         }
     }
 
+    /// 指定したPrincipalが持つデバイスエイリアス一覧を取得します。
     pub fn get_device_aliases(&self, caller: Principal) -> Vec<DeviceAlias> {
         self.devices
             .get(&caller)
@@ -67,6 +74,7 @@ impl Devices {
             .unwrap_or_default()
     }
 
+    /// 指定したPrincipalのデバイスから、エイリアスが一致するデバイスを削除します。
     pub fn delete_device(&mut self, caller: Principal, alias: DeviceAlias) {
         if let Some(device_data) = self.devices.get_mut(&caller) {
             // Principalは、必ず1つ以上のデバイスエイリアスが紐づいているものとします。
@@ -79,6 +87,13 @@ impl Devices {
         }
     }
 
+    /// 指定した公開鍵に紐づいている対称鍵を取得します。
+    ///
+    /// # Returns
+    /// * `Ok(EncryptedSymmetricKey)` - 対称鍵が登録されている場合
+    /// * `DeviceError::UnknownPublicKey` - 公開鍵が登録されていない場合
+    /// * `DeviceError::KeyNotSynchronized` - 対称鍵が登録されていない場合
+    /// * `DeviceError::DeviceNotRegistered` - Principalが登録されていない場合
     pub fn get_encrypted_symmetric_key(
         &mut self,
         caller: Principal,
@@ -98,6 +113,7 @@ impl Devices {
         }
     }
 
+    /// 対称鍵を持っていない公開鍵の一覧を取得します。
     pub fn get_unsynced_public_keys(&mut self, caller: Principal) -> Vec<PublicKey> {
         match self.devices.get_mut(&caller) {
             Some(device_data) => device_data
@@ -110,12 +126,26 @@ impl Devices {
         }
     }
 
+    /// 指定したPrincipalが対称鍵を持っているかどうかを確認するための関数です。
+    /// この関数は、`register_encrypted_symmetric_key`が呼ばれる前に呼ばれることを想定しています。
+    ///
+    /// # Returns
+    /// * `true` - 既に対称鍵が登録されている場合
+    /// * `false` - 対称鍵が登録されていない場合
     pub fn is_encrypted_symmetric_key_registered(&self, caller: Principal) -> bool {
         self.devices
             .get(&caller)
             .map_or(false, |device_data| !device_data.keys.is_empty())
     }
 
+    /// 指定したPrincipalのデバイスデータに、対称鍵を登録します。
+    /// この関数は、Principal1つにつき、ただ一度だけ呼ばれることを想定しています。
+    ///
+    /// # Returns
+    /// * `Ok(())` - 登録に成功した場合
+    /// * `DeviceError::UnknownPublicKey` - 公開鍵が登録されていない場合
+    /// * `DeviceError::AlreadyRegistered` - 既に対称鍵が登録されている場合
+    /// * `DeviceError::DeviceNotRegistered` - Principalが登録されていない場合
     pub fn register_encrypted_symmetric_key(
         &mut self,
         caller: Principal,
@@ -137,6 +167,12 @@ impl Devices {
         }
     }
 
+    /// 指定したPrincipalのデバイスデータに、公開鍵と対称鍵のペアを登録します。
+    ///
+    /// # Returns
+    /// * `Ok(())` - 登録に成功した場合
+    /// * `DeviceError::UnknownPublicKey` - 公開鍵が登録されていない場合
+    /// * `DeviceError::DeviceNotRegistered` - Principalが登録されていない場合
     pub fn upload_encrypted_symmetric_keys(
         &mut self,
         caller: Principal,
@@ -156,6 +192,8 @@ impl Devices {
         }
     }
 
+    /// 指定したデバイスデータに、公開鍵が登録されているかどうかを確認するための関数です。
+    /// この関数は、引数に`PublicKey`を受け取る関数内で使用します。
     fn is_registered_public_key(device_data: &DeviceData, public_key: &PublicKey) -> bool {
         device_data.aliases.values().any(|key| key == public_key)
     }

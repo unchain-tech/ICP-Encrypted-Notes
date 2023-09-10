@@ -1,25 +1,26 @@
 import { Box, SimpleGrid, useDisclosure } from '@chakra-ui/react';
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DeleteItemDialog, DeviceCard, Layout } from '../../components';
 import { useDeviceCheck, useMessage } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
-export const Devices: FC = () => {
-  const { auth } = useAuthContext();
-  const { showMessage } = useMessage();
+export const Devices = () => {
   const {
     isOpen: isOpenDeleteDialog,
     onOpen: onOpenDeleteDialog,
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
   const navigate = useNavigate();
+
+  const { auth, logout } = useAuthContext();
+  const { isDeviceRemoved } = useDeviceCheck();
+  const { showMessage } = useMessage();
+
   const [deviceAliases, setDeviceAliases] = useState<string[]>([]);
   const [deleteAlias, setDeleteAlias] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-
-  useDeviceCheck();
 
   const openDeleteDialog = (alias: string) => {
     setDeleteAlias(alias);
@@ -73,6 +74,33 @@ export const Devices: FC = () => {
     (async () => {
       await getDevices();
     })();
+  }, [auth]);
+
+  useEffect(() => {
+    // 1秒ごとにポーリングします。
+    const intervalId = setInterval(async () => {
+      console.log('Check device data...');
+
+      const isRemoved = await isDeviceRemoved();
+      if (isRemoved) {
+        try {
+          await logout();
+          showMessage({
+            title: 'This device has been deleted.',
+            status: 'info',
+          });
+          navigate('/');
+        } catch (err) {
+          showMessage({ title: 'Failed to logout', status: 'error' });
+          console.error(err);
+        }
+      }
+    }, 1000);
+
+    // クリーンアップ関数を返します。
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [auth]);
 
   if (auth.status === 'ANONYMOUS') {

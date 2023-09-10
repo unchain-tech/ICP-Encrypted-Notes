@@ -25,6 +25,7 @@ type SynchronizeKeyResult = variant {
 };
 
 service : {
+  "deleteDevice" : (DeviceAlias) -> ();
   "getDeviceAliases" : () -> (vec DeviceAlias) query;
   "getEncryptedSymmetricKey" : (PublicKey) -> (SynchronizeKeyResult) query;
   "getUnsyncedPublicKeys" : () -> (vec PublicKey) query;
@@ -32,9 +33,8 @@ service : {
   "registerDevice" : (DeviceAlias, PublicKey) -> ();
   "registerEncryptedSymmetricKey" : (PublicKey, EncryptedSymmetricKey) -> (RegisterKeyResult);
   "uploadEncryptedSymmetricKeys" : (vec record { PublicKey; EncryptedSymmetricKey }) -> (RegisterKeyResult);
-  "deleteDevice" : (DeviceAlias) -> ();
-  "getNotes" : () -> (vec EncryptedNote) query;
   "addNote" : (text) -> ();
   "deleteNote" : (nat) -> ();
+  "getNotes" : () -> (vec EncryptedNote) query;
   "updateNote" : (EncryptedNote) -> ();
 };

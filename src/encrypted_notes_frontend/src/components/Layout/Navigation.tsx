@@ -1,5 +1,4 @@
 import { Box, Flex, Stack, Text } from '@chakra-ui/react';
-import { FC } from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface LinkItemProps {
@@ -12,7 +11,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Devices', href: '/devices' },
 ];
 
-export const Navigation: FC = () => {
+export const Navigation = () => {
   return (
     <Box
       bg={'gray.100'}

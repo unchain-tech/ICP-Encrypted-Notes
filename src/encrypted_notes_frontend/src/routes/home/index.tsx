@@ -1,12 +1,13 @@
 import { Box, Button, Heading, Text } from '@chakra-ui/react';
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useMessage } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
-export const Home: FC = () => {
+export const Home = () => {
   const navigate = useNavigate();
+
   const { login } = useAuthContext();
   const { showMessage } = useMessage();
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +56,7 @@ export const Home: FC = () => {
         size={{ base: 'sm', lg: 'lg' }}
         onClick={handleLogin}
       >
-        Authenticate
+        Login with Internet Identity
       </Button>
     </Box>
   );

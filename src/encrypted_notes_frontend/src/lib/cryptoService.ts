@@ -22,19 +22,19 @@ export class CryptoService {
   constructor(actor: ActorSubclass<_SERVICE>) {
     this.actor = actor;
 
+    // デバイスエイリアスが存在しない場合は、UUIDを生成して保存します。
     this.deviceAlias = window.localStorage.getItem('deviceAlias');
     if (!this.deviceAlias) {
       this.deviceAlias = uuidV4();
       window.localStorage.setItem('deviceAlias', this.deviceAlias);
     }
-    console.log(`Device alias: ${this.deviceAlias}`); // TODO: delete
   }
 
   /**
    * 鍵に関する設定を行う初期化関数です。
    */
   public async init(): Promise<boolean> {
-    /** STEP4: 公開鍵・秘密鍵の取得と保存 */
+    /** STEP2: 公開鍵・秘密鍵を生成します。 */
     // データベースから公開鍵・秘密鍵を取得します。
     this.publicKey = await loadKey('publicKey');
     this.privateKey = await loadKey('privateKey');
@@ -51,6 +51,7 @@ export class CryptoService {
       this.privateKey = keyPair.privateKey;
     }
 
+    /** STEP8: デバイスデータを登録します。 */
     // publicKeyをexportしてBase64に変換します。
     const exportedPublicKey = await window.crypto.subtle.exportKey(
       'spki',
@@ -58,14 +59,13 @@ export class CryptoService {
     );
     this.exportedPublicKeyBase64 = this.arrayBufferToBase64(exportedPublicKey);
 
-    /** STEP2: デバイスデータの登録*/
-    // バックエンドキャニスターにデバイスエイリアスと（"STEP4"が完了したら）公開鍵を登録します。
+    // バックエンドキャニスターにデバイスエイリアスと公開鍵を登録します。
     await this.actor.registerDevice(
       this.deviceAlias,
       this.exportedPublicKeyBase64,
     );
 
-    /** STEP5: 対称鍵を取得する */
+    /** STEP9: 対称鍵を生成します。 */
     const isSymKeyRegistered =
       await this.actor.isEncryptedSymmetricKeyRegistered();
     if (!isSymKeyRegistered) {
@@ -95,7 +95,7 @@ export class CryptoService {
         }
       }
 
-      /** STEP6: 対称鍵を同期する */
+      /** STEP10: 対称鍵を同期します。 */
       console.log('Synchronizing symmetric keys...');
       if (this.intervalId === null) {
         this.intervalId = window.setInterval(
@@ -106,6 +106,7 @@ export class CryptoService {
 
       return true;
     } else {
+      /** STEP11: 対称鍵を取得します。 */
       console.log('Get symmetric key...');
       const synced = await this.trySyncSymmetricKey();
 
@@ -118,6 +119,7 @@ export class CryptoService {
     const syncedSymmetricKey: SynchronizeKeyResult =
       await this.actor.getEncryptedSymmetricKey(this.exportedPublicKeyBase64);
     if ('Err' in syncedSymmetricKey) {
+      // エラー処理を行います。
       if ('UnknownPublicKey' in syncedSymmetricKey.Err) {
         throw new Error('Unknown public key');
       }
@@ -129,12 +131,12 @@ export class CryptoService {
         return false;
       }
     } else {
+      // 暗号化された対称鍵を取得して復号します。
       this.symmetricKey = await this.unwrapSymmetricKey(
         syncedSymmetricKey.Ok,
         this.privateKey,
       );
       // 対称鍵が取得できたので、このデバイスでも鍵の同期処理を開始します。
-      console.log(`Check intervalId: ${this.intervalId}`); // TODO: delete
       if (this.intervalId === null) {
         console.log('Try syncing symmetric keys...');
         this.intervalId = window.setInterval(
@@ -146,7 +148,6 @@ export class CryptoService {
     }
   }
 
-  /** STEP3: デバイスデータの削除 */
   public async clearDeviceData(): Promise<void> {
     if (this.intervalId !== null) {
       window.clearInterval(this.intervalId);
@@ -162,7 +163,6 @@ export class CryptoService {
     this.exportedPublicKeyBase64 = null;
   }
 
-  /** STEP7: ノートの暗号化・復号 */
   public async encryptNote(data: string): Promise<string> {
     if (this.symmetricKey === null) {
       throw new Error('Not found symmetric key');
@@ -226,7 +226,24 @@ export class CryptoService {
     return decodedDecryptedNote;
   }
 
-  // TODO: 以下の関数はスターターに入れておく
+  private arrayBufferToBase64(buffer: ArrayBuffer): string {
+    // 1. new Uint8Array(buffer)で`buffer`の中身を一要素1バイトの配列に変換します。
+    // 2. String.fromCharCode()で文字列に変換します。
+    // // 文字コード（Uint8Arrayには文字が数値として格納されている）を文字（string型）として扱うためです。
+    const stringData = String.fromCharCode(...new Uint8Array(buffer));
+    // console.log(`stringData: ${stringData}`); // TODO: delete
+    // Base64エンコードを行います。
+    return window.btoa(stringData);
+  }
+
+  private base64ToArrayBuffer(base64: string): ArrayBuffer {
+    // Base64エンコーディングでエンコードされたデータの文字列をデコードします。
+    const stringData = window.atob(base64);
+    // 1. 一文字ずつ`charCodeAt()`で文字コードに変換します。
+    // 2. `Uint8Array.from()`で配列に変換します。
+    return Uint8Array.from(stringData, (dataChar) => dataChar.charCodeAt(0));
+  }
+
   private async generateKeyPair(): Promise<CryptoKeyPair> {
     const keyPair = await window.crypto.subtle.generateKey(
       {
@@ -260,50 +277,6 @@ export class CryptoService {
     return symmetricKey;
   }
 
-  private async wrapSymmetricKey(
-    symmetricKey: CryptoKey,
-    wrappingKey: CryptoKey,
-  ): Promise<string> {
-    const wrappedSymmetricKey = await window.crypto.subtle.wrapKey(
-      'raw',
-      symmetricKey,
-      wrappingKey,
-      {
-        name: 'RSA-OAEP',
-      },
-    );
-
-    const wrappedSymmetricKeyBase64: string =
-      this.arrayBufferToBase64(wrappedSymmetricKey);
-
-    return wrappedSymmetricKeyBase64;
-  }
-
-  private async unwrapSymmetricKey(
-    wrappedSymmetricKeyBase64: string,
-    unwrappingKey: CryptoKey,
-  ): Promise<CryptoKey> {
-    const wrappedSymmetricKey: ArrayBuffer = this.base64ToArrayBuffer(
-      wrappedSymmetricKeyBase64,
-    );
-
-    const symmetricKey = await window.crypto.subtle.unwrapKey(
-      'raw',
-      wrappedSymmetricKey,
-      unwrappingKey,
-      {
-        name: 'RSA-OAEP',
-      },
-      {
-        name: 'AES-GCM',
-        length: 256,
-      },
-      true,
-      ['encrypt', 'decrypt'],
-    );
-
-    return symmetricKey;
-  }
   /**
    * 対称鍵を同期する関数です。
    *
@@ -315,7 +288,7 @@ export class CryptoService {
       throw new Error('Symmetric key is not generated');
     }
 
-    // 同期されていないデバイスの公開鍵を取得する
+    // 同期されていないデバイスの公開鍵を取得します。
     const unsyncedPublicKeys: string[] =
       await this.actor.getUnsyncedPublicKeys();
     const symmetricKey = this.symmetricKey;
@@ -351,21 +324,48 @@ export class CryptoService {
     }
   }
 
-  private arrayBufferToBase64(buffer: ArrayBuffer): string {
-    // 1. new Uint8Array(buffer)で`buffer`の中身を一要素1バイトの配列に変換します。
-    // 2. String.fromCharCode()で文字列に変換します。
-    // // 文字コード（Uint8Arrayには文字が数値として格納されている）を文字（string型）として扱うためです。
-    const stringData = String.fromCharCode(...new Uint8Array(buffer));
-    console.log(`stringData: ${stringData}`); // TODO: delete
-    // Base64エンコードを行います。
-    return window.btoa(stringData);
+  private async unwrapSymmetricKey(
+    wrappedSymmetricKeyBase64: string,
+    unwrappingKey: CryptoKey,
+  ): Promise<CryptoKey> {
+    const wrappedSymmetricKey: ArrayBuffer = this.base64ToArrayBuffer(
+      wrappedSymmetricKeyBase64,
+    );
+
+    const symmetricKey = await window.crypto.subtle.unwrapKey(
+      'raw',
+      wrappedSymmetricKey,
+      unwrappingKey,
+      {
+        name: 'RSA-OAEP',
+      },
+      {
+        name: 'AES-GCM',
+        length: 256,
+      },
+      true,
+      ['encrypt', 'decrypt'],
+    );
+
+    return symmetricKey;
   }
 
-  private base64ToArrayBuffer(base64: string): ArrayBuffer {
-    // Base64エンコーディングでエンコードされたデータの文字列をデコードします。
-    const stringData = window.atob(base64);
-    // 1. 一文字ずつ`charCodeAt()`で文字コードに変換します。
-    // 2. `Uint8Array.from()`で配列に変換します。
-    return Uint8Array.from(stringData, (dataChar) => dataChar.charCodeAt(0));
+  private async wrapSymmetricKey(
+    symmetricKey: CryptoKey,
+    wrappingKey: CryptoKey,
+  ): Promise<string> {
+    const wrappedSymmetricKey = await window.crypto.subtle.wrapKey(
+      'raw',
+      symmetricKey,
+      wrappingKey,
+      {
+        name: 'RSA-OAEP',
+      },
+    );
+
+    const wrappedSymmetricKeyBase64: string =
+      this.arrayBufferToBase64(wrappedSymmetricKey);
+
+    return wrappedSymmetricKeyBase64;
   }
 }
