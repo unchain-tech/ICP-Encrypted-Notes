@@ -12,23 +12,29 @@ import {
 } from '@chakra-ui/react';
 import { FC } from 'react';
 
+import type { EncryptedNote } from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+
 interface NoteModalProps {
-  currentNote: string;
+  currentNote: EncryptedNote;
+  isLoading: boolean;
   isOpen: boolean;
   title: string;
   handleSaveNote: () => void;
   onClose: () => void;
-  setCurrentNote: (note: string) => void;
+  setCurrentNote: (note: EncryptedNote) => void;
 }
 
 export const NoteModal: FC<NoteModalProps> = ({
   currentNote,
+  isLoading,
   isOpen,
   title,
   handleSaveNote,
   onClose,
   setCurrentNote,
 }) => {
+  const safeCurrentNote = currentNote || { id: BigInt(0), data: '' };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
       <ModalOverlay />
@@ -39,17 +45,27 @@ export const NoteModal: FC<NoteModalProps> = ({
           <FormControl>
             <Textarea
               placeholder="Write your note here..."
-              value={currentNote}
-              onChange={(e) => setCurrentNote(e.target.value)}
+              value={safeCurrentNote.data}
+              onChange={(e) =>
+                setCurrentNote({
+                  id: safeCurrentNote.id,
+                  data: e.target.value,
+                })
+              }
             />
           </FormControl>
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme={'blue'} mr={3} onClick={handleSaveNote}>
+          <Button
+            colorScheme={'blue'}
+            mr={3}
+            isLoading={isLoading}
+            onClick={handleSaveNote}
+          >
             Save
           </Button>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" isDisabled={isLoading} onClick={onClose}>
             Cancel
           </Button>
         </ModalFooter>

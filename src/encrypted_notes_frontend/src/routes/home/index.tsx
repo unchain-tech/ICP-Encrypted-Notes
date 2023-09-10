@@ -1,6 +1,18 @@
 import { Box, Button, Heading, Text } from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useMessage } from '../../hooks';
 
 export const Home = () => {
+  const navigate = useNavigate();
+  const { showMessage } = useMessage();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    console.log(`Click "Login with Internet Identity"`)
+  }
+
   return (
     <Box
       display={'flex'}
@@ -21,8 +33,13 @@ export const Home = () => {
       <Text fontSize={'xl'} mb={'2rem'}>
         Please authenticate with Internet Identity.
       </Text>
-      <Button colorScheme={'green'} size={{ base: 'sm', lg: 'lg' }}>
-        Authenticate
+      <Button
+        colorScheme={'green'}
+        isLoading={isLoading}
+        size={{ base: 'sm', lg: 'lg' }}
+        onClick={handleLogin}
+      >
+        Login with Internet Identity
       </Button>
     </Box>
   );
