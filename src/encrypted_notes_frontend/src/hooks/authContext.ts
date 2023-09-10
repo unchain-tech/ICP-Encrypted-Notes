@@ -52,7 +52,9 @@ export const useAuthProvider = (): AuthState => {
     }
 
     try {
+      // デバイスデータを削除します。
       await auth.cryptoService.clearDeviceData();
+      // AuthClient内のデータをクリアします。
       await auth.authClient.logout();
       setAuth({ status: 'ANONYMOUS' });
     } catch (err) {

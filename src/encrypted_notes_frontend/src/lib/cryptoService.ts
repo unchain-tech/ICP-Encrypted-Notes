@@ -2,8 +2,6 @@ import { ActorSubclass } from '@dfinity/agent';
 
 import {
   _SERVICE,
-  RegisterKeyResult,
-  SynchronizeKeyResult,
 } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 
 export class CryptoService {
@@ -33,13 +31,15 @@ export class CryptoService {
 
   public async clearDeviceData(): Promise<void> {
     if (this.intervalId !== null) {
+      // インターバルを停止します。
       window.clearInterval(this.intervalId);
+      // インターバルIDを初期化します。
       this.intervalId = null;
     }
 
-    await clearKeys();
-    window.localStorage.removeItem('deviceAlias');
+    // ストレージからデバイスデータを削除します。
 
+    // CryptoServiceクラスのメンバー変数を初期化します。
     this.publicKey = null;
     this.privateKey = null;
     this.symmetricKey = null;
@@ -69,7 +69,7 @@ export class CryptoService {
   public async trySyncSymmetricKey(): Promise<boolean> {
     /** 対称鍵が同期されているか確認します。 */
 
-    const syncedSymmetricKey: SynchronizeKeyResult = { Err: 'dummy', };
+    const syncedSymmetricKey = { Err: 'dummy', };
     if ('Err' in syncedSymmetricKey) {
       /** エラー処理を行います。 */
       return false;
