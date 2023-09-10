@@ -79,7 +79,7 @@ export const Devices = () => {
 
   useEffect(() => {
     // 1秒ごとにポーリングします。
-    const intervalId = setInterval(async () => {
+    const intervalId = window.setInterval(async () => {
       console.log('Check device data...');
 
       const isRemoved = await isDeviceRemoved();
