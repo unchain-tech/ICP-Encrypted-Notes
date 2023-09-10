@@ -11,10 +11,12 @@ import {
 import { FC } from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 
+import { EncryptedNote } from '../../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
+
 interface NoteCardProps {
-  note: string;
-  handleOpenDeleteDialog: () => void;
-  handleOpenEditModal: (note: string) => void;
+  note: EncryptedNote;
+  handleOpenDeleteDialog: (id: bigint) => void;
+  handleOpenEditModal: (note: EncryptedNote) => void;
 }
 
 export const NoteCard: FC<NoteCardProps> = ({
@@ -26,7 +28,7 @@ export const NoteCard: FC<NoteCardProps> = ({
     <Card variant={'outline'}>
       <CardBody>
         <Stack mt={'6'} spacing={'3'}>
-          <Text>{note}</Text>
+          <Text>{note.data}</Text>
         </Stack>
       </CardBody>
       <Divider />
@@ -35,14 +37,12 @@ export const NoteCard: FC<NoteCardProps> = ({
           <IconButton
             aria-label="Trash note"
             icon={<FiTrash2 />}
-            onClick={handleOpenDeleteDialog}
+            onClick={() => handleOpenDeleteDialog(note.id)}
           />
           <IconButton
             aria-label="Edit note"
             icon={<FiEdit />}
-            onClick={() => {
-              handleOpenEditModal(note);
-            }}
+            onClick={() => handleOpenEditModal(note)}
           />
         </ButtonGroup>
       </CardFooter>

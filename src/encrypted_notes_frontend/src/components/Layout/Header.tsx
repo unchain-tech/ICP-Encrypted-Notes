@@ -1,8 +1,7 @@
 import { Box, Flex, Icon } from '@chakra-ui/react';
-import { FC } from 'react';
 import { FiBookOpen } from 'react-icons/fi';
 
-export const Header: FC = () => {
+export const Header = () => {
   return (
     <>
       <Box

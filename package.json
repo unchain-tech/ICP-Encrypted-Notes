@@ -1,7 +1,7 @@
 {
-  "name": "encrypted_notes_frontend",
+  "name": "icp_encrypted_notes",
   "version": "0.2.0",
-  "description": "Internet Computer starter application",
+  "description": "ICP Encrypted Notes starter kit",
   "keywords": [
     "Internet Computer",
     "Motoko",
@@ -18,9 +18,10 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.7.1",
-    "@dfinity/agent": "^0.15.6",
-    "@dfinity/candid": "^0.15.6",
-    "@dfinity/principal": "^0.15.6",
+    "@dfinity/agent": "^0.18.0",
+    "@dfinity/auth-client": "^0.18.1",
+    "@dfinity/candid": "^0.18.0",
+    "@dfinity/principal": "^0.18.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "framer-motion": "^10.12.17",
