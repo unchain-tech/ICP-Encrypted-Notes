@@ -1,13 +1,14 @@
-# Create your first NFT game.
+# Completed ICP Encrypted Notes
 
-このコースを始めるには、下記のステップを実行してください。
+![](/image/bannr.png)
 
-1. あなたの Github アカウントにこのレポジトリをフォークしましょう。
+このリポジトリは UNCHAIN ICP Encrypted Notes の見本コードです。
 
-2. クローンしたレポジトリをあなたのローカル環境にダウンロードしましょう。
+## 動かしてみよう
 
-3. ターミナルを開き、ディレクトリのルートで `npm install` を実行します。
-
-4. `npm run start` を実行してプロジェクトを開始します。
-
-5. コーディングを始めましょう。
+1. リポジトリをクローンする
+2. `npm install` を実行する
+3. `dfx start --clean --background` を実行する
+4. `npm run deploy:local`　を実行する
+5. `npm run start` を実行する
+6. http://localhost:8080 にアクセスをしましょう！
