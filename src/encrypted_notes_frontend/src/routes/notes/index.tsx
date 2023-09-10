@@ -14,18 +14,20 @@ import { useDeviceCheck, useMessage } from '../../hooks';
 import { useAuthContext } from '../../hooks/authContext';
 
 export const Notes = () => {
-  const navigate = useNavigate();
-  const {
-    isOpen: isOpenNoteModal,
-    onOpen: onOpenNoteModal,
-    onClose: onCloseNoteModal,
-  } = useDisclosure();
   const {
     isOpen: isOpenDeleteDialog,
     onOpen: onOpenDeleteDialog,
     onClose: onCloseDeleteDialog,
   } = useDisclosure();
-  const { auth } = useAuthContext();
+  const {
+    isOpen: isOpenNoteModal,
+    onOpen: onOpenNoteModal,
+    onClose: onCloseNoteModal,
+  } = useDisclosure();
+  const navigate = useNavigate();
+
+  const { auth, logout } = useAuthContext();
+  const { isDeviceRemoved } = useDeviceCheck();
   const { showMessage } = useMessage();
 
   const [mode, setMode] = useState<'add' | 'edit'>('add');
@@ -35,8 +37,6 @@ export const Notes = () => {
   );
   const [deleteId, setDeleteId] = useState<bigint | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-
-  useDeviceCheck();
 
   const openAddNoteModal = () => {
     setMode('add');
@@ -159,6 +159,33 @@ export const Notes = () => {
       </Layout>
     );
   }
+
+  useEffect(() => {
+    // 1秒ごとにポーリングします。
+    const intervalId = setInterval(async () => {
+      console.log('Check device data...');
+
+      const isRemoved = await isDeviceRemoved();
+      if (isRemoved) {
+        try {
+          await logout();
+          showMessage({
+            title: 'This device has been deleted.',
+            status: 'info',
+          });
+          navigate('/');
+        } catch (err) {
+          showMessage({ title: 'Failed to logout', status: 'error' });
+          console.error(err);
+        }
+      }
+    }, 1000);
+
+    // クリーンアップ関数を返します。
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [auth]);
 
   return (
     <>
