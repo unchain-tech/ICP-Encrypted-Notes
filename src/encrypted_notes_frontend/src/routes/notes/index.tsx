@@ -150,16 +150,6 @@ export const Notes = () => {
     })();
   }, [auth.status]);
 
-  if (auth.status === 'SYNCHRONIZING') {
-    return (
-      <Layout>
-        <Box p={6} overflowY={'auto'} maxHeight={'calc(100vh - 64px)'}>
-          Loading...
-        </Box>
-      </Layout>
-    );
-  }
-
   useEffect(() => {
     // 1秒ごとにポーリングします。
     const intervalId = window.setInterval(async () => {
@@ -186,6 +176,20 @@ export const Notes = () => {
       clearInterval(intervalId);
     };
   }, [auth]);
+
+  if (auth.status === 'ANONYMOUS') {
+    return null;
+  }
+
+  if (auth.status === 'SYNCHRONIZING') {
+    return (
+      <Layout>
+        <Box p={6} overflowY={'auto'} maxHeight={'calc(100vh - 64px)'}>
+          Loading...
+        </Box>
+      </Layout>
+    );
+  }
 
   return (
     <>
