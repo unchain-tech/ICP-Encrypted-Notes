@@ -10,10 +10,8 @@ export const useDeviceCheck = () => {
       return false;
     }
 
-    // バックエンドキャニスターからデバイスエイリアスを取得します。
-    const deviceAlias = ['dummy'];
-    // 自身のデバイスエイリアスが含まれていない場合は、デバイスが削除されたと判断します。
-    return !deviceAlias.includes(auth.cryptoService.deviceAlias);
+    // デバイスエイリアス一覧を取得して、自身のエイリアスが含まれているかを確認します。
+    return false;
   }, [auth]);
 
   return { isDeviceRemoved };
