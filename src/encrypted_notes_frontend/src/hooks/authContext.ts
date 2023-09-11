@@ -38,8 +38,9 @@ export const useAuthProvider = (): AuthState => {
     /** STEP5: CryptoServiceクラスのインスタンスを生成します。 */
     const cryptoService = new CryptoService();
 
-    /** STEP12: デバイスデータの設定を行います。 */
+    /** STEP7: デバイスデータの設定を行います。 */
 
+    setAuth({ status: 'SYNCHRONIZING' });
   };
 
   const login = async (): Promise<void> => {
