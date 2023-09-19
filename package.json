@@ -14,7 +14,7 @@
     "start": "webpack serve --mode development --env development",
     "deploy:local": "dfx deploy --network=local",
     "deploy:ic": "dfx deploy --network=ic",
-    "generate": "dfx generate encrypted_notes_backend",
+    "generate": "bash ./scripts/did.sh && dfx generate encrypted_notes_backend",
     "fmt:check": "cargo fmt --check",
     "fmt": "cargo fmt",
     "clippy": "cargo clippy",
