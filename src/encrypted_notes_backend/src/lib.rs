@@ -1,8 +1,8 @@
 use crate::devices::*;
 use crate::notes::*;
+use candid::Principal;
 use ic_cdk::api::caller as caller_api;
-use ic_cdk::export::Principal;
-use ic_cdk_macros::*;
+use ic_cdk_macros::{export_candid, query, update};
 use std::cell::RefCell;
 
 mod devices;
@@ -157,3 +157,6 @@ fn update_note(new_note: EncryptedNote) {
         notes.borrow_mut().update_note(caller, new_note);
     })
 }
+
+// .didファイルを生成します。
+export_candid!();
