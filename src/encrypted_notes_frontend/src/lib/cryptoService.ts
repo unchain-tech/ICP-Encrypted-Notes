@@ -3,8 +3,8 @@ import { v4 as uuidV4 } from 'uuid';
 
 import {
   _SERVICE,
-  RegisterKeyResult,
-  SynchronizeKeyResult,
+  Result,
+  Result_1,
 } from '../../../declarations/encrypted_notes_backend/encrypted_notes_backend.did';
 import { clearKeys, loadKey, storeKey } from './keyStorage';
 
@@ -78,11 +78,10 @@ export class CryptoService {
         this.publicKey,
       );
       // 暗号化した対称鍵をバックエンドキャニスターに登録します。
-      const result: RegisterKeyResult =
-        await this.actor.registerEncryptedSymmetricKey(
-          this.exportedPublicKeyBase64,
-          wrappedSymmetricKeyBase64,
-        );
+      const result: Result_1 = await this.actor.registerEncryptedSymmetricKey(
+        this.exportedPublicKeyBase64,
+        wrappedSymmetricKeyBase64,
+      );
       if ('Err' in result) {
         if ('UnknownPublicKey' in result.Err) {
           throw new Error('Unknown public key');
@@ -116,7 +115,7 @@ export class CryptoService {
 
   public async trySyncSymmetricKey(): Promise<boolean> {
     // 対称鍵が同期されているか確認します。
-    const syncedSymmetricKey: SynchronizeKeyResult =
+    const syncedSymmetricKey: Result =
       await this.actor.getEncryptedSymmetricKey(this.exportedPublicKeyBase64);
     if ('Err' in syncedSymmetricKey) {
       // エラー処理を行います。

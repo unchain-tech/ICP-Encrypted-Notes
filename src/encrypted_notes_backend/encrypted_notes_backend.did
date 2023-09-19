@@ -1,40 +1,23 @@
-type DeviceAlias = text;
-type PublicKey = text;
-type EncryptedSymmetricKey = text;
-
-type EncryptedNote = record {
-  "id" : nat;
-  "data" : text;
-};
-
 type DeviceError = variant {
-  AlreadyRegistered;
   DeviceNotRegistered;
-  KeyNotSynchronized;
+  AlreadyRegistered;
   UnknownPublicKey;
+  KeyNotSynchronized;
 };
-
-type RegisterKeyResult = variant {
-  Ok;
-  Err : DeviceError;
-};
-
-type SynchronizeKeyResult = variant {
-  Ok : EncryptedSymmetricKey;
-  Err : DeviceError;
-};
-
+type EncryptedNote = record { id : nat; data : text };
+type Result = variant { Ok : text; Err : DeviceError };
+type Result_1 = variant { Ok; Err : DeviceError };
 service : {
-  "deleteDevice" : (DeviceAlias) -> ();
-  "getDeviceAliases" : () -> (vec DeviceAlias) query;
-  "getEncryptedSymmetricKey" : (PublicKey) -> (SynchronizeKeyResult) query;
-  "getUnsyncedPublicKeys" : () -> (vec PublicKey) query;
-  "isEncryptedSymmetricKeyRegistered" : () -> (bool) query;
-  "registerDevice" : (DeviceAlias, PublicKey) -> ();
-  "registerEncryptedSymmetricKey" : (PublicKey, EncryptedSymmetricKey) -> (RegisterKeyResult);
-  "uploadEncryptedSymmetricKeys" : (vec record { PublicKey; EncryptedSymmetricKey }) -> (RegisterKeyResult);
-  "addNote" : (text) -> ();
-  "deleteNote" : (nat) -> ();
-  "getNotes" : () -> (vec EncryptedNote) query;
-  "updateNote" : (EncryptedNote) -> ();
-};
+  addNote : (text) -> ();
+  deleteDevice : (text) -> ();
+  deleteNote : (nat) -> ();
+  getDeviceAliases : () -> (vec text) query;
+  getEncryptedSymmetricKey : (text) -> (Result) query;
+  getNotes : () -> (vec EncryptedNote) query;
+  getUnsyncedPublicKeys : () -> (vec text) query;
+  isEncryptedSymmetricKeyRegistered : () -> (bool) query;
+  registerDevice : (text, text) -> ();
+  registerEncryptedSymmetricKey : (text, text) -> (Result_1);
+  updateNote : (EncryptedNote) -> ();
+  uploadEncryptedSymmetricKeys : (vec record { text; text }) -> (Result_1);
+}
