@@ -1,5 +1,4 @@
-use candid::CandidType;
-use ic_cdk::export::Principal;
+use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
