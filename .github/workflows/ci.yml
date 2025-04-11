@@ -29,14 +29,14 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-      - name: clippy
-        run: npm run clippy
-      - name: rustfmt
-        run: npm run fmt
       - name: lint
-        run: npm run lint
+        run: |
+          npm run lint
+          npm run clippy
       - name: format
-        run: npm run prettier:check
+        run: |
+          npm run prettier:check
+          npm run fmt
 
   contract-test:
     runs-on: ubuntu-latest
