@@ -50,7 +50,10 @@ jobs:
       - name: Install WebAssembly target
         run: rustup target add wasm32-unknown-unknown
       - name: Install IC SDK
-        run: DFX_VERSION=0.14.1 sh -ci "$(curl -sSL https://internetcomputer.org/install.sh)"
+        uses: dfinity/setup-dfx@main
+        # DFX_VERSION=0.14.1 sh -ci "$(curl -sSL https://internetcomputer.org/install.sh)"
+      - name: Confirm successful installation
+        run: dfx --version
       - name: unit test
         run: npm run test
 
